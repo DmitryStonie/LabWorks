@@ -1,20 +1,115 @@
-// LifeGame.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <string>
+#include "GameField.h"
+#include "Console.h"
 
-int main()
+using namespace std;
+
+#define DEFAULT_ITERATIONS 1000
+#define DEFAULT_OUTPUT_FILENAME string("a.txt")
+#define DEFAULT_INPUT_FILENAME string("default.txt")
+
+
+enum modeCodes {
+	DEFAULT_MODE = 1,
+	ONLINE_MODE = 2,
+	OFFLINE_MODE = 3
+};
+
+void input(int argc, char* argv[], int& mode, int& iterations, string& input_filename, string& output_filename);
+
+
+int main(int argc, char* argv[])
 {
-    std::cout << "Hello. This is a test.";
+	int mode = 1, iterations = 0;
+	string input_filename, output_filename;
+	input(argc, argv, mode, iterations, input_filename, output_filename);
+	input_filename = "config.txt";
+	GameField map(input_filename);
+	map.printMap(map);
+	return 0;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void input(int argc, char* argv[], int& mode, int& iterations, string& input_filename, string& output_filename) {
+	ErrorOutput errout;
+	if (argc < 2) {	//only programm
+		mode = DEFAULT_MODE;
+		input_filename = DEFAULT_INPUT_FILENAME;
+		return;
+	}
+	else if (argc < 3) {	//only programm and input_filename
+		input_filename = argv[1];	
+		mode = ONLINE_MODE;
+		return;
+	}
+	else {
+		input_filename = argv[1];
+		mode = OFFLINE_MODE;
+	}
+	int is_iterations = 0, is_output_filename = 0;
+	for (int i = 2; i < argc; i++) {        
+		if (strlen(argv[i]) > 1) {
+			if (argv[i][0] == '-' && argv[i][1] == 'i') {	//-i
+				if (is_iterations == 0) is_iterations = 1;
+				else{
+					errout.writeToConsole(MULTIPLE_ITERATIONS);
+				}
+				if (i + 1 < argc) {
+					iterations = stoi(argv[i + 1]);
+					i++;
+				}
+				else {
+					errout.writeToConsole(INCORRECT_ITERATIONS);
+				}
+			}
+			else if (argv[i][0] == '-' && argv[i][1] == 'o'){	//-o
+				if (is_output_filename == 0) is_output_filename = 1;
+				else {
+					errout.writeToConsole(MULTIPLE_ITERATIONS);
+				} 
+				if (i + 1 < argc) {
+					output_filename = argv[i + 1];
+					i++;
+				}
+				else {
+					errout.writeToConsole(INCORRECT_INPUT_FILENAME);
+				}
+			}
+			else if (strlen(argv[i]) >= 13 && string(argv[i]).substr(0, 13) == string("--iterations=")) {		//--iterations=
+				if (is_iterations == 0) is_iterations = 1;
+				else {
+					errout.writeToConsole(MULTIPLE_ITERATIONS);
+				}
+				if (strlen(argv[i]) == 13) {
+					errout.writeToConsole(INCORRECT_ITERATIONS_LONG);
+				}
+				else {
+					iterations = stoi(string(argv[i]).substr(13));
+				}
+			}
+			else if (strlen(argv[i]) >= 9 && string(argv[i]).substr(0, 9) == string("--output=")) {			//--output=
+				if (is_output_filename == 0) is_output_filename = 1;
+				else {
+					errout.writeToConsole(MULTIPLE_ITERATIONS);
+				}
+				if (strlen(argv[i]) == 9) {
+					errout.writeToConsole(INCORRECT_INPUT_FILENAME_LONG);
+				}
+				else {
+					output_filename = string(argv[i]).substr(9);
+				}
+			} 
+			else {
+				errout.writeToConsole(INCORRECT_PARAMETER);
+			}
+		}
+	}
+	if (is_iterations == 0) {
+		iterations = DEFAULT_ITERATIONS;
+		errout.writeToConsole(NONINITIALIZED_ITERATIONS);
+	}
+	if (is_output_filename == 0) {
+		output_filename = DEFAULT_OUTPUT_FILENAME;
+		errout.writeToConsole(NONINITIALIZED_INPUT_FILENAME);
+	}
+}
