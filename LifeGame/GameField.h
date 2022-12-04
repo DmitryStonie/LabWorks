@@ -9,8 +9,8 @@ using namespace std;
 class GameField {
 	vector<vector<char>> field;
 	string universe_name;
-	vector<int> survive_rule;
-	vector<int> birth_rule;
+	set<int> survive_rule;
+	set<int> birth_rule;
 	int width;
 	int height;
 	int input_rules(string source, GameField &map);
@@ -19,6 +19,8 @@ class GameField {
 	void calculate_size(ifstream& inf, GameField& map);
 	inline int count_center_neighbours(int x, int y, GameField& map);
 	inline int count_border_neighbours(int x, int y, GameField& map);
+	inline void update_center_cell(int x, int y, GameField& map, GameField& tmp_map);
+	inline void update_border_cell(int x, int y, GameField& map, GameField& tmp_map);
 
 public:
 	GameField();

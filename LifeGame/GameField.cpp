@@ -2,12 +2,12 @@
 #include "GameField.h"
 #include "Console.h"
 #include <fstream>
-#include <bitset>
+#include <set>
 
 using namespace std;
 
-const vector<int> DEFAULT_SURVIVE_RULE = { 2, 3 };
-const vector<int> DEFAULT_BIRTH_RULE = { 3 };
+const set<int> DEFAULT_SURVIVE_RULE{ 2, 3 };
+const set<int> DEFAULT_BIRTH_RULE{ 3 };
 const int DEFAULT_WIDTH = 72;
 const int DEFAULT_HEIGHT = 48;
 const int NON_CRITICAL_ERROR = 2;
@@ -123,16 +123,14 @@ void GameField::input_header(ifstream& inf, GameField& map) {
 
 int GameField::input_rules(string source, GameField &map) {
 	ErrorOutput errout;
-	vector<int> tmp_birth(9), tmp_survive(9);
 	int pos = CURRENT_POS;
 	if (source[pos] != BIRTH_LETTER) {
 		return CRITICAL_ERROR;
 	}
 	pos++;
 	for (; pos < source.length(); pos++) {
-		if (source[pos] >= LOWEST_RULE_NUMBER && source[pos] <= HIGHEST_RULE_NUMBER && tmp_birth[source[pos] - CHAR_TO_NUM_COEF] == NOT_ENTERED) {
-			tmp_birth[source[pos] - CHAR_TO_NUM_COEF] = ENTERED;
-			map.birth_rule.push_back(source[pos] - CHAR_TO_NUM_COEF);
+		if (source[pos] >= LOWEST_RULE_NUMBER && source[pos] <= HIGHEST_RULE_NUMBER) {
+			map.birth_rule.insert(source[pos] - CHAR_TO_NUM_COEF);
 		}
 		else if(source[pos] == SLASH) {
 			pos++;
@@ -144,9 +142,8 @@ int GameField::input_rules(string source, GameField &map) {
 	}
 	pos++;
 	for (; pos < source.length(); pos++) {
-		if (source[pos] >= LOWEST_RULE_NUMBER && source[pos] <= HIGHEST_RULE_NUMBER && tmp_birth[source[pos] - CHAR_TO_NUM_COEF] == NOT_ENTERED) {
-			tmp_survive[source[pos] - CHAR_TO_NUM_COEF] = ENTERED;
-			map.survive_rule.push_back(source[pos] - CHAR_TO_NUM_COEF);
+		if (source[pos] >= LOWEST_RULE_NUMBER && source[pos] <= HIGHEST_RULE_NUMBER) {
+			map.survive_rule.insert(source[pos] - CHAR_TO_NUM_COEF);
 		}
 	}
 	return RULES_ENTERED;
@@ -194,8 +191,17 @@ void GameField::makeIteration(GameField& map) {
 	int cell = 0;
 	for (int i = 1; i < map.height - 1; i++) {
 		for (int j = 1; j < map.width - 1; j++) {
-			
+			cell = tmp_map.field[i][j];
+			update_center_cell(i, j, tmp_map, map);
 		}
+	}
+	for (int i = 0; i < map.height; i++) {
+		update_border_cell(i, 0, map, tmp_map);
+		update_border_cell(i, map.width - 1, map, tmp_map);
+	}
+	for (int i = 0; i < map.height; i++) {
+		update_border_cell(0, i, map, tmp_map);
+		update_border_cell(map.height - 1, i, map, tmp_map);
 	}
 }
 
@@ -215,6 +221,23 @@ inline int GameField::count_border_neighbours(int x, int y, GameField& map) {
 		+ map.field[(x - 1) % map.width][(y - 1) % map.height]
 		+ map.field[x % map.width][(y + 1) % map.height]
 		+ map.field[x % map.width][(y - 1) % map.height]);
+}
+
+inline void GameField::update_center_cell(int x, int y, GameField& map, GameField& tmp_map) {
+	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_center_neighbours(x, y, tmp_map)) == 0) {
+		map.field[x][y] = DEAD_CELL;
+	}
+	else if (tmp_map.field[x][y] == DEAD_CELL && tmp_map.birth_rule.count(count_center_neighbours(x, y, tmp_map)) > 0) {
+		map.field[x][y] = ALIVE_CELL;
+	}
+}
+inline void GameField::update_border_cell(int x, int y, GameField& map, GameField& tmp_map) {
+	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_border_neighbours(x, y, tmp_map)) == 0) {
+		map.field[x][y] = DEAD_CELL;
+	}
+	else if (tmp_map.field[x][y] == DEAD_CELL && tmp_map.birth_rule.count(count_border_neighbours(x, y, tmp_map)) > 0) {
+		map.field[x][y] = ALIVE_CELL;
+	}
 }
 
 int count_border_neighbours(int x, int y, GameField& map);
