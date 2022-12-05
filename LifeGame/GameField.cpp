@@ -193,18 +193,16 @@ GameField& GameField::operator=(const GameField& a) {
 void GameField::makeIteration(GameField& map) {
 	static GameField tmp_map;
 	tmp_map = map;
-	int cell = 0;
 	for (int i = 1; i < map.height - 1; i++) {
 		for (int j = 1; j < map.width - 1; j++) {
-			cell = tmp_map.field[i][j];
-			update_center_cell(i, j, tmp_map, map);
+			update_center_cell(i, j, map, tmp_map);
 		}
 	}
 	for (int i = 0; i < map.height; i++) {
 		update_border_cell(i, 0, map, tmp_map);
 		update_border_cell(i, map.width - 1, map, tmp_map);
 	}
-	for (int i = 0; i < map.height; i++) {
+	for (int i = 0; i < map.width; i++) {
 		update_border_cell(0, i, map, tmp_map);
 		update_border_cell(map.height - 1, i, map, tmp_map);
 	}
@@ -218,7 +216,7 @@ inline int GameField::count_center_neighbours(int x, int y, GameField& map) {
 }
 
 inline int GameField::count_border_neighbours(int x, int y, GameField& map) {
-	return (map.field[(x + 1 + map.width)%map.width][(y + map.height) % map.height]
+	return (map.field[(x + 1 + map.width) % map.width][(y + map.height) % map.height]
 		+ map.field[(x - 1 + map.width) % map.width][(y + map.height) % map.height]
 		+ map.field[(x + 1 + map.width) % map.width][(y + 1 + map.height) % map.height]
 		+ map.field[(x - 1 + map.width) % map.width][(y + 1 + map.height) % map.height]
@@ -232,10 +230,11 @@ inline void GameField::update_center_cell(int x, int y, GameField& map, GameFiel
 	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_center_neighbours(x, y, tmp_map)) == 0) {
 		map.field[x][y] = DEAD_CELL;
 	}
-	else if (tmp_map.field[x][y] == DEAD_CELL && tmp_map.birth_rule.count(count_center_neighbours(x, y, tmp_map)) > 0) {
+	else if (tmp_map.field[x][y] == DEAD_CELL && tmp_map.birth_rule.count(count_center_neighbours(x, y, tmp_map)) != 0) {
 		map.field[x][y] = ALIVE_CELL;
 	}
 }
+
 inline void GameField::update_border_cell(int x, int y, GameField& map, GameField& tmp_map) {
 	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_border_neighbours(x, y, tmp_map)) == 0) {
 		map.field[x][y] = DEAD_CELL;
@@ -249,18 +248,18 @@ void GameField::printMap() {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			if (field[i][j] == ALIVE_CELL) {
-				cout << 'O';
+				cout << 'O' << ' ';
 			} else {
-				cout << '#';
+				cout << '#' << ' ';
 			}
 		}
 		cout << '\n';
 	}
 }
 
-void GameField::dump(string filename) {
+void GameField::dump(string filename) {	//wrong need numbers
 	ofstream fout(filename);
-	fout << FILE_FORMAT << '\n' << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
+	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
 	for (set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
 		fout << (char)(*birth_num + CHAR_TO_NUM_COEF);
 	}
@@ -272,18 +271,14 @@ void GameField::dump(string filename) {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			if (field[i][j] == ALIVE_CELL) {
-				fout << 'O';
-			}
-			else {
-				fout << '#';
+				fout << i << " " << j << '\n';
 			}
 		}
-		fout << '\n';
 	}
 	fout.close();
 }
 
-void GameField::iterate(int current_iteration, int count) {
+void GameField::iterate(int &current_iteration, int count) {
 	current_iteration += count;
 	cout << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
 	for (set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {

@@ -49,3 +49,16 @@ ErrorOutput::~ErrorOutput() {
 void Console::help() {
 	cout << "Это сообщение help";
 }
+
+void Console::start_interaction() {
+	string input;
+	for (;;) {
+		getline(cin, input);
+		/*switch (input) {
+		case DUMP_STR:
+				dump();
+				break;
+
+		}*/
+	}
+}

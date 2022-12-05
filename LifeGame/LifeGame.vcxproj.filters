@@ -34,7 +34,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="config.txt">
+    <Text Include="defaultUniverse.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

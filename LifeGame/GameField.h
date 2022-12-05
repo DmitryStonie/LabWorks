@@ -31,5 +31,5 @@ public:
 	void makeIteration(GameField& map);
 	void printMap();
 	void dump(string filename);
-	void iterate(int current_iteration, int count);
+	void iterate(int& current_iteration, int count);
 };

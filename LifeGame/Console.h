@@ -38,9 +38,12 @@ enum errorsCodes {
 
 class Console {
 	string toOutput;
+	const string DUMP_STR = "dump";
+	const string HELP_STR = "help";
 public:
 	void writeToConsole(string toWtrite);
 	void help();
+	void start_interaction();
 };
 
 class ErrorOutput : public Console {

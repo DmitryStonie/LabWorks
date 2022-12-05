@@ -2,6 +2,7 @@
 #include <string>
 #include "GameField.h"
 #include "Console.h"
+#include "windows.h"
 
 using namespace std;
 
@@ -22,14 +23,17 @@ void input(int argc, char* argv[], int& mode, int& iterations, string& input_fil
 int main(int argc, char* argv[])
 {
 	int mode = 1, iterations = 0;
-	string input_filename, output_filename;
-	input(argc, argv, mode, iterations, input_filename, output_filename);
-	input_filename = "config.txt";
+	string input_filename = "defaultUniverse.txt", output_filename = "out.txt";
+	//input(argc, argv, mode, iterations, input_filename, output_filename);
 	GameField map(input_filename);
-	output_filename = "out.txt";
+	Console console;
+	console.start_iteraction();
+	map.printMap();
+	for (int i = 0; i < 500; i++) {
+		map.iterate(iterations, 1);
+		//Sleep(100);
+	}
 	map.dump(output_filename);
-	map.iterate(iterations, 1);
-	map.iterate(iterations, 1);
 	return 0;
 }
 
