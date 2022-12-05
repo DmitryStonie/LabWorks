@@ -3,6 +3,12 @@
 #include <iostream>
 #include "GameField.h"
 
+#include <boost/program_options.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+namespace po = boost::program_options;
+namespace fs = boost::filesystem;
+
 using namespace std;
 
 enum errorsCodes {
@@ -38,12 +44,18 @@ enum errorsCodes {
 
 class Console {
 	string toOutput;
-	const string DUMP_STR = "dump";
-	const string HELP_STR = "help";
+	po::options_description desc;
+	po::positional_options_description pos_desc;
+	po::variables_map var_map;
+	po::variables_map pos_map;
 public:
+	Console();
+	Console(int argc, char** argv);
 	void writeToConsole(string toWtrite);
 	void help();
-	void start_interaction();
+	void gameFieldInitialization(GameField& map);
+	//void start_interaction();
+
 };
 
 class ErrorOutput : public Console {
@@ -82,5 +94,4 @@ public:
 	ErrorOutput();
 	~ErrorOutput();
 	void writeToConsole(int errorId);
-	void writeToConsole(int errorId, string extraInformation);
 };

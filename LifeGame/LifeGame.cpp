@@ -22,18 +22,11 @@ void input(int argc, char* argv[], int& mode, int& iterations, string& input_fil
 
 int main(int argc, char* argv[])
 {
-	int mode = 1, iterations = 0;
-	string input_filename = "defaultUniverse.txt", output_filename = "out.txt";
-	//input(argc, argv, mode, iterations, input_filename, output_filename);
-	GameField map(input_filename);
-	Console console;
-	console.start_iteraction();
+	GameField map;
+	Console console_input(argc, argv);
+	console_input.gameFieldInitialization(map);
 	map.printMap();
-	for (int i = 0; i < 500; i++) {
-		map.iterate(iterations, 1);
-		//Sleep(100);
-	}
-	map.dump(output_filename);
+	map.dump(DEFAULT_OUTPUT_FILENAME);
 	return 0;
 }
 

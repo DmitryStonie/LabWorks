@@ -12,8 +12,12 @@ class GameField {
 	string universe_name;
 	set<int> survive_rule;
 	set<int> birth_rule;
+	string input_file;
+	string output_file;
 	int width;
 	int height;
+	int iterations;
+	int mode;
 	int input_rules(string source, GameField &map);
 	void input_header(ifstream& inf, GameField &map);
 	void input_cells(ifstream& inf, GameField &map);
@@ -22,7 +26,6 @@ class GameField {
 	inline int count_border_neighbours(int x, int y, GameField& map);
 	inline void update_center_cell(int x, int y, GameField& map, GameField& tmp_map);
 	inline void update_border_cell(int x, int y, GameField& map, GameField& tmp_map);
-
 public:
 	GameField();
 	GameField(string input_filename);
@@ -32,4 +35,6 @@ public:
 	void printMap();
 	void dump(string filename);
 	void iterate(int& current_iteration, int count);
+
+	friend class Console;
 };
