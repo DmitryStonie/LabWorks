@@ -26,7 +26,10 @@ int main(int argc, char* argv[])
 	input(argc, argv, mode, iterations, input_filename, output_filename);
 	input_filename = "config.txt";
 	GameField map(input_filename);
-	map.printMap(map);
+	output_filename = "out.txt";
+	map.dump(output_filename);
+	map.iterate(iterations, 1);
+	map.iterate(iterations, 1);
 	return 0;
 }
 

@@ -1,0 +1,10 @@
+#Life 1.06
+TestUniverse
+#R B12/S23
+#O#
+##O
+OO#
+###
+###
+###
+##O

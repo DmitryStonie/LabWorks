@@ -45,3 +45,7 @@ ErrorOutput::ErrorOutput() {
 ErrorOutput::~ErrorOutput() {
 
 }
+
+void Console::help() {
+	cout << "Это сообщение help";
+}

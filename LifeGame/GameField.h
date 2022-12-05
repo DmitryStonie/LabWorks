@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "Console.h"
+#include <set> 
 
 
 using namespace std;
@@ -28,5 +29,7 @@ public:
 	GameField& operator=(const GameField &a);
 	~GameField();
 	void makeIteration(GameField& map);
-	void printMap(GameField& map);
+	void printMap();
+	void dump(string filename);
+	void iterate(int current_iteration, int count);
 };

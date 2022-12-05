@@ -40,6 +40,7 @@ class Console {
 	string toOutput;
 public:
 	void writeToConsole(string toWtrite);
+	void help();
 };
 
 class ErrorOutput : public Console {
