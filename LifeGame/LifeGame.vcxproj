@@ -130,11 +130,13 @@
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="GameField.cpp" />
+    <ClCompile Include="InputArgs.cpp" />
     <ClCompile Include="LifeGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console.h" />
     <ClInclude Include="GameField.h" />
+    <ClInclude Include="ArgsContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="defaultUniverse.txt" />

@@ -1,4 +1,5 @@
 #include "Console.h"
+#include "GameField.h"
 #include <map>
 
 
@@ -6,37 +7,15 @@ const int DEFAULT_ITERATIONS = 10;
 const string DEFAULT_OUTPUT_FILENAME = string("a.txt");
 const string DEFAULT_INPUT_FILENAME = string("default.txt");
 
-Console::Console(){}
-Console::Console(int argc, char** argv) {
-	GameField tmp_map;
-	po::options_description desc("Allowed options:");
-	desc.add_options()
-		("help", "Writes help message")
-		("iterations,i", po::value<int>(&tmp_map.iterations)->default_value(DEFAULT_ITERATIONS), "Number of universe iterations")
-		("input", po::value<string>(&tmp_map.input_file)->default_value(DEFAULT_INPUT_FILENAME), "Name of file for input")
-		("output,o", po::value<string>(&tmp_map.output_file)->default_value(DEFAULT_OUTPUT_FILENAME), "Name of file for output")
-		;
+Console::Console(){
 
-	po::variables_map var_map;
-	po::store(po::parse_command_line(argc, argv, desc), var_map);
-	po::notify(var_map);
-	if (var_map.count("help")) {
-		cout << desc << '\n';
-	}
-
-	po::positional_options_description desc_pos;
-	desc_pos.add("input", -1);
-
-	po::variables_map pos_map;
-	po::store(po::command_line_parser(argc, argv).options(desc).positional(desc_pos).run(), pos_map);
-	po::notify(pos_map);
 }
 
-void Console::writeToConsole(string toWrite) {
-	
+Console::~Console() {
+
 }
 
-void ErrorOutput::writeToConsole(int errorId) {
+void Console::writeError(int errorId) {
 	setlocale(LC_ALL, "Russian");
 	map<int, string> errors = {
 		{CANNOT_OPEN_FILE, "Ошибка : невозможно открыть файл."},
@@ -49,22 +28,41 @@ void ErrorOutput::writeToConsole(int errorId) {
 		{NO_FILE_FORMAT,"Ошибка : не указан формат файла."},
 		{NO_UNIVERSE_NAME,"Ошибка : не указано название вселенной. Использовано значение по умолчанию."},
 		{NO_GAME_RULES,"Ошибка : не указаны правила игры. Использованы значения по умолчанию."},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{}
 	};
 	cerr << errors[errorId] << endl;
 }
 
-ErrorOutput::ErrorOutput(){}
+void Console::printMap(GameField& map) {
+	for (int i = 0; i < map.height; i++) {
+		for (int j = 0; j < map.width; j++) {
+			if (map.field[i][j] == ALIVE_CELL) {
+				cout << 'O' << ' ';
+			}
+			else {
+				cout << '#' << ' ';
+			}
+		}
+		cout << '\n';
+	}
+}
 
-ErrorOutput::~ErrorOutput(){}
+void Console::dump(GameField& map) {
+	ofstream fout(map.input_file);
+	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << map.universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
+	for (set<int>::iterator birth_num = map.birth_rule.begin(); birth_num != map.birth_rule.end(); ++birth_num) {
+		fout << (char)(*birth_num + CHAR_TO_NUM_COEF);
+	}
+	fout << SLASH << SURVIVE_LETTER;
+	for (set<int>::iterator survive_num = map.survive_rule.begin(); survive_num != map.survive_rule.end(); ++survive_num) {
+		fout << (char)(*survive_num + CHAR_TO_NUM_COEF);
+	}
+	fout << '\n';
+	for (int i = 0; i < map.height; i++) {
+		for (int j = 0; j < map.width; j++) {
+			if (map.field[i][j] == ALIVE_CELL) {
+				fout << i << " " << j << '\n';
+			}
+		}
+	}
+	fout.close();
+}

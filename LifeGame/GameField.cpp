@@ -5,34 +5,8 @@
 #include <set>
 #include <iterator>
 
-using namespace std;
-
-const set<int> DEFAULT_SURVIVE_RULE{ 2, 3 };
-const set<int> DEFAULT_BIRTH_RULE{ 3 };
-const int DEFAULT_WIDTH = 72;
-const int DEFAULT_HEIGHT = 48;
-const int NON_CRITICAL_ERROR = 2;
-const int CRITICAL_ERROR = 3;
-const int RULES_ENTERED = 4;
-const int ALIVE_CELL = 1;
-const int DEAD_CELL = 0;
-const string DEFAULT_UNIVERSE_NAME = ("DefaultUniverseName");
-const string FILE_FORMAT = "#Life 1.06";
-const string UNIVERSE_NAME_SPEC = "#N ";
-const string RULES_SPEC = "#R ";
-const int NUM_OF_INIT_LINES = 3;
-const int CURRENT_POS = 3;
-const int SPEC_LENGTH = 3;
-const char BIRTH_LETTER = 'B';
-const char SURVIVE_LETTER = 'S';
-const char LOWEST_RULE_NUMBER = '0';
-const char HIGHEST_RULE_NUMBER = '8';
-const char CHAR_TO_NUM_COEF = 48;
-const int NOT_ENTERED = 0;
-const int ENTERED = 1;
-const int NO_SURVIVE_RULE_ERROR = 2;
-const char SLASH = '/';
-
+using namespace gamefield;
+using namespace console;
 
 GameField::GameField() {
 	width = DEFAULT_WIDTH;
@@ -43,11 +17,11 @@ GameField::GameField() {
 }
 
 GameField::GameField(string input_filename) {
-	ErrorOutput errout;
+	Console errout;
 	ifstream inf(input_filename);
 	int tmp = 0;
 	if (!inf) {
-		errout.writeToConsole(CANNOT_OPEN_FILE);
+		errout.writeError(CANNOT_OPEN_FILE);
 		field.resize(height, vector<char>(width, DEAD_CELL));	//not good, need own map
 		survive_rule = DEFAULT_SURVIVE_RULE;
 		birth_rule = DEFAULT_BIRTH_RULE;
@@ -242,40 +216,6 @@ inline void GameField::update_border_cell(int x, int y, GameField& map, GameFiel
 	else if (tmp_map.field[x][y] == DEAD_CELL && tmp_map.birth_rule.count(count_border_neighbours(x, y, tmp_map)) > 0) {
 		map.field[x][y] = ALIVE_CELL;
 	}
-}
-
-void GameField::printMap() {
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			if (field[i][j] == ALIVE_CELL) {
-				cout << 'O' << ' ';
-			} else {
-				cout << '#' << ' ';
-			}
-		}
-		cout << '\n';
-	}
-}
-
-void GameField::dump(string filename) {	//wrong need numbers
-	ofstream fout(filename);
-	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
-	for (set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
-		fout << (char)(*birth_num + CHAR_TO_NUM_COEF);
-	}
-	fout << SLASH << SURVIVE_LETTER;
-	for (set<int>::iterator survive_num = survive_rule.begin(); survive_num != survive_rule.end(); ++survive_num) {
-		fout << (char)(*survive_num + CHAR_TO_NUM_COEF);
-	}
-	fout << '\n';
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			if (field[i][j] == ALIVE_CELL) {
-				fout << i << " " << j << '\n';
-			}
-		}
-	}
-	fout.close();
 }
 
 void GameField::iterate(int &current_iteration, int count) {
