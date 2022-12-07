@@ -34,13 +34,29 @@ namespace console {
 		MULTIPLE_ALIVE_CELL = 27,
 		WRONG_RULE_FORMAT_DEFAULT = 28
 	};
+	enum commandCodes {
+		WRONG_COMMAND = 1,
+		DUMP = 2,
+		TICK = 3,
+		EXIT = 4,
+		HELP = 5
+	};
+	const int COMMAND_LENGTH = 5;
 
+	const std::string DUMP_STR = "dump ";
+	const std::string HELP_STR = "help";
+	const std::string EXIT_STR = "exit";
+	const std::string TICK_STR = "tick";
+	const std::string T_STR = "t";
+	const std::string LEFTARROW = "<";
+	const std::string RIGHTARROW = ">";
+	//std::map<std::string> 
 	class Console {
 	public:
 		Console();
 		~Console();
 		void writeError(int errorId);
-		void dump(gamefield::GameField& map);
-		void printMap(gamefield::GameField& map);
+		int read_command(std::string& argument);
+		void printMap(std::vector<std::vector<int>> field, int height, int width);
 	};
 }

@@ -1,21 +1,22 @@
-#include "InputArgs.h"
+#include "ArgsContainer.h"
+
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-using namespace argscontainer;
+namespace ac = argscontainer;
 
-ArgsContainer::ArgsContainer() {
+ac::ArgsContainer::ArgsContainer() {
 
 }
 
-ArgsContainer::ArgsContainer(int argc, char** argv) {
+ac::ArgsContainer::ArgsContainer(int argc, char** argv) {
 	gamefield::GameField tmp_map;
 	po::options_description desc("Allowed options:");
 	desc.add_options()
 		("help", "Writes help message")
 		("iterations,i", po::value<int>(&tmp_map.iterations)->default_value(DEFAULT_ITERATIONS), "Number of universe iterations")
-		("input", po::value<string>(&tmp_map.input_file)->default_value(DEFAULT_INPUT_FILENAME), "Name of file for input")
-		("output,o", po::value<string>(&tmp_map.output_file)->default_value(DEFAULT_OUTPUT_FILENAME), "Name of file for output")
+		("input", po::value<std::string>(&tmp_map.input_file)->default_value(DEFAULT_INPUT_FILENAME), "Name of file for input")
+		("output,o", po::value<std::string>(&tmp_map.output_file)->default_value(DEFAULT_OUTPUT_FILENAME), "Name of file for output")
 		;
 
 	po::variables_map var_map;
@@ -33,10 +34,10 @@ ArgsContainer::ArgsContainer(int argc, char** argv) {
 	po::notify(pos_map);
 }
 
-ArgsContainer::~ArgsContainer() {
+ac::ArgsContainer::~ArgsContainer() {
 
 }
 
-void ArgsContainer::gameFieldInitialization(gamefield::GameField& map) {
+void ac::ArgsContainer::gameFieldInitialization(gamefield::GameField& map) {
 
 }

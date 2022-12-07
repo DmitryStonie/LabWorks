@@ -10,8 +10,8 @@ namespace po = boost::program_options;
 
 namespace argscontainer {
 	const int DEFAULT_ITERATIONS = 10;
-	const std::string DEFAULT_OUTPUT_FILENAME = string("defaultOutput.txt");
-	const std::string DEFAULT_INPUT_FILENAME = string("defaultInput.txt");
+	const std::string DEFAULT_OUTPUT_FILENAME = "defaultOutput.txt";
+	const std::string DEFAULT_INPUT_FILENAME = "defaultInput.txt";
 
 	class ArgsContainer {
 		gamefield::GameField buf_field;

@@ -1,23 +1,23 @@
 #include "Console.h"
-#include "GameField.h"
 #include <map>
-
+#include <fstream>
 
 const int DEFAULT_ITERATIONS = 10;
-const string DEFAULT_OUTPUT_FILENAME = string("a.txt");
-const string DEFAULT_INPUT_FILENAME = string("default.txt");
+const int ALIVE_CELL = 1;
+const std::string DEFAULT_OUTPUT_FILENAME = std::string("a.txt");
+const std::string DEFAULT_INPUT_FILENAME = std::string("default.txt");
 
-Console::Console(){
-
-}
-
-Console::~Console() {
+console::Console::Console(){
 
 }
 
-void Console::writeError(int errorId) {
+console::Console::~Console() {
+
+}
+
+void console::Console::writeError(int errorId) {
 	setlocale(LC_ALL, "Russian");
-	map<int, string> errors = {
+	std::map<int, std::string> errors = {
 		{CANNOT_OPEN_FILE, "Ошибка : невозможно открыть файл."},
 		{MULTIPLE_FILE_FORMAT, "Ошибка : неправильно указан формат файла"},
 		{WRONG_UNIVERSE_NAME, "Ошибка : неправильно указано название вселенной."},
@@ -29,40 +29,44 @@ void Console::writeError(int errorId) {
 		{NO_UNIVERSE_NAME,"Ошибка : не указано название вселенной. Использовано значение по умолчанию."},
 		{NO_GAME_RULES,"Ошибка : не указаны правила игры. Использованы значения по умолчанию."},
 	};
-	cerr << errors[errorId] << endl;
+	std::cerr << errors[errorId] << std::endl;
 }
 
-void Console::printMap(GameField& map) {
-	for (int i = 0; i < map.height; i++) {
-		for (int j = 0; j < map.width; j++) {
-			if (map.field[i][j] == ALIVE_CELL) {
-				cout << 'O' << ' ';
+void console::Console::printMap(std::vector<std::vector<int>> field, int height, int width) {
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			if (field[i][j] == ALIVE_CELL) {
+				std::cout << 'O' << ' ';
 			}
 			else {
-				cout << '#' << ' ';
+				std::cout << '#' << ' ';
 			}
 		}
-		cout << '\n';
+		std::cout << '\n';
 	}
 }
 
-void Console::dump(GameField& map) {
-	ofstream fout(map.input_file);
-	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << map.universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
-	for (set<int>::iterator birth_num = map.birth_rule.begin(); birth_num != map.birth_rule.end(); ++birth_num) {
-		fout << (char)(*birth_num + CHAR_TO_NUM_COEF);
+int console::Console::read_command(std::string &argument) {
+	std::string input, tmp;
+	std::cin >> input;
+	tmp = input.substr(0, COMMAND_LENGTH);
+	if (tmp == DUMP_STR) {
+		if (input.find(LEFTARROW, 0) == std::string::npos || input.find(RIGHTARROW, 0) == std::string::npos) return WRONG_COMMAND;
+		else argument = input.substr(input.find(LEFTARROW, 0) + 1, input.find(RIGHTARROW, 0) - input.find(LEFTARROW, 0) - 1);
+		return DUMP;
 	}
-	fout << SLASH << SURVIVE_LETTER;
-	for (set<int>::iterator survive_num = map.survive_rule.begin(); survive_num != map.survive_rule.end(); ++survive_num) {
-		fout << (char)(*survive_num + CHAR_TO_NUM_COEF);
+	else if(tmp == HELP_STR) {
+		return HELP;
 	}
-	fout << '\n';
-	for (int i = 0; i < map.height; i++) {
-		for (int j = 0; j < map.width; j++) {
-			if (map.field[i][j] == ALIVE_CELL) {
-				fout << i << " " << j << '\n';
-			}
-		}
+	else if(tmp == EXIT_STR) {
+		return EXIT;
 	}
-	fout.close();
+	else if (tmp == TICK_STR || tmp == T_STR) {
+		if (input.find(LEFTARROW, 0) == std::string::npos || input.find(RIGHTARROW, 0) == std::string::npos) return WRONG_COMMAND;
+		else argument = input.substr(input.find(LEFTARROW, 0) + 1, input.find(RIGHTARROW, 0) - input.find(LEFTARROW, 0) - 1);
+		return TICK;
+	}
+	else {
+		return WRONG_COMMAND;
+	}
 }

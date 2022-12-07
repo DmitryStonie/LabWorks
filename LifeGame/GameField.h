@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "Console.h"
 #include <set> 
 
 namespace gamefield {
@@ -31,6 +30,14 @@ namespace gamefield {
 	const int NO_SURVIVE_RULE_ERROR = 2;
 	const char SLASH = '/';
 
+	enum commandCodes {
+		WRONG_COMMAND = 1,
+		DUMP = 2,
+		TICK = 3,
+		EXIT = 4,
+		HELP = 5
+	};
+
 	class GameField {
 		std::vector<std::vector<char>> field;
 		std::string universe_name;
@@ -57,8 +64,8 @@ namespace gamefield {
 		~GameField();
 		void makeIteration(GameField& map);
 		void iterate(int& current_iteration, int count);
-
-		friend class Console;
-		friend class ArgsContainer;
+		std::vector<std::vector<char>> return_map();
+		void dump(std::string output_file);
+		void run();
 	};
 }
