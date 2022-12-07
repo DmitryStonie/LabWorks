@@ -195,15 +195,15 @@ inline int gf::GameField::count_center_neighbours(int x, int y, GameField& map) 
 		+ map.field[x][y + 1] + map.field[x][y - 1]);
 }
 
-inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) {
-	return (map.field[(x + 1 + map.width) % map.width][(y + map.height) % map.height]
-		+ map.field[(x - 1 + map.width) % map.width][(y + map.height) % map.height]
-		+ map.field[(x + 1 + map.width) % map.width][(y + 1 + map.height) % map.height]
-		+ map.field[(x - 1 + map.width) % map.width][(y + 1 + map.height) % map.height]
-		+ map.field[(x + 1 + map.width) % map.width][(y - 1 + map.height) % map.height]
-		+ map.field[(x - 1 + map.width) % map.width][(y - 1 + map.height) % map.height]
-		+ map.field[(x + map.width) % map.width][(y + 1 + map.height) % map.height]
-		+ map.field[(x + map.width) % map.width][(y - 1 + map.height) % map.height]);
+inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) {//there mistake
+	return (map.field[(x + 1 + map.height) % map.height][(y + map.width) % map.width]
+		+ map.field[(x - 1 + map.height) % map.height][(y + map.width) % map.width]
+		+ map.field[(x + 1 + map.height) % map.height][(y + 1 + map.width) % map.width]
+		+ map.field[(x - 1 + map.height) % map.height][(y + 1 + map.width) % map.width]
+		+ map.field[(x + 1 + map.height) % map.height][(y - 1 + map.width) % map.width]
+		+ map.field[(x - 1 + map.height) % map.height][(y - 1 + map.width) % map.width]
+		+ map.field[(x + map.height) % map.height][(y + 1 + map.width) % map.width]
+		+ map.field[(x + map.height) % map.height][(y - 1 + map.width) % map.width]);
 }
 
 inline void gf::GameField::update_center_cell(int x, int y, GameField& map, GameField& tmp_map) {
@@ -224,7 +224,7 @@ inline void gf::GameField::update_border_cell(int x, int y, GameField& map, Game
 	}
 }
 
-void gf::GameField::iterate(int count) {
+void gf::GameField::iterate(int count, int silence) {
 	Console show_map;
 	iterations += count;
 	std::cout << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
@@ -239,7 +239,9 @@ void gf::GameField::iterate(int count) {
 	for (int i = 0; i < count; i++) {
 		makeIteration(*this);
 	}
-	show_map.printMap(return_map(), height, width);
+	if (silence == NO_SILENCE) {
+		show_map.printMap(return_map(), height, width);
+	}
 }
 
 std::vector<std::vector<char>> gf::GameField::return_map() {
@@ -270,6 +272,10 @@ void gf::GameField::dump(std::string output_file) {
 }
 
 void gf::GameField::run() {
+	if (mode == DEFAULT_MODE) {
+		iterate(iterations, SILENCE);
+		(*this).dump(output_file);
+	}
 	Console coutput;
 	std::string argument;
 	int returned_code = 0, ticks = 0, end_of_programm = 0;
@@ -318,13 +324,12 @@ gf::ArgsContainer::~ArgsContainer() {
 }
 
 gf::ArgsContainer::ArgsContainer(int argc, char** argv) {
-	gamefield::GameField tmp_map;
 	po::options_description desc("Allowed options:");
 	desc.add_options()
 		("help", "Writes help message")
-		("iterations,i", po::value<int>(&tmp_map.iterations)->default_value(DEFAULT_ITERATIONS), "Number of universe iterations")
-		("input", po::value<std::string>(&tmp_map.input_file)->default_value(DEFAULT_INPUT_FILENAME), "Name of file for input")
-		("output,o", po::value<std::string>(&tmp_map.output_file)->default_value(DEFAULT_OUTPUT_FILENAME), "Name of file for output")
+		("iterations,i", po::value<int>(&buf_field.iterations)->default_value(DEFAULT_ITERATIONS), "Number of universe iterations")
+		("input", po::value<std::string>(&buf_field.input_file)->default_value(DEFAULT_INPUT_FILENAME), "Name of file for input")
+		("output,o", po::value<std::string>(&buf_field.output_file)->default_value(DEFAULT_OUTPUT_FILENAME), "Name of file for output")
 		;
 
 	po::variables_map var_map;
@@ -340,10 +345,28 @@ gf::ArgsContainer::ArgsContainer(int argc, char** argv) {
 	po::variables_map pos_map;
 	po::store(po::command_line_parser(argc, argv).options(desc).positional(desc_pos).run(), pos_map);
 	po::notify(pos_map);
+	if (pos_map.count("input")) {
+		buf_field.input_file = pos_map["input"].as<std::string>();
+	}
+	else {
+		buf_field.input_file = var_map["input"].as<std::string>();
+	}
+	buf_field.output_file = var_map["output"].as<std::string>();
+	buf_field.iterations = var_map["iterations"].as<int>();
 }
 
 void gf::ArgsContainer::gameFieldInitialization(gamefield::GameField& map) {
+	gamefield::GameField tmp(buf_field.input_file);
+	map = tmp;
 	map.iterations = buf_field.iterations;
 	map.input_file = buf_field.input_file;
 	map.output_file = buf_field.output_file;
+	if (buf_field.output_file != DEFAULT_OUTPUT_FILENAME && buf_field.input_file != DEFAULT_INPUT_FILENAME && buf_field.iterations != DEFAULT_ITERATIONS) {
+		tmp.mode = OFFLINE_MODE;
+	} else if (buf_field.input_file != DEFAULT_INPUT_FILENAME) {
+		tmp.mode = ONLINE_MODE;
+	}
+	else {
+		tmp.mode = DEFAULT_MODE;
+	}
 }

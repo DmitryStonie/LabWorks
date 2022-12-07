@@ -40,6 +40,8 @@ namespace gamefield {
 	const std::string HELP_MESSAGE = "This is a help message\n";
 	const std::string EXIT_MESSAGE = "End of the program...\n";
 	const int END_OF_PROGRAMM = 1;
+	const int SILENCE = 1;
+	const int NO_SILENCE = 0;
 
 	enum commandCodes {
 		WRONG_COMMAND = 1,
@@ -47,6 +49,12 @@ namespace gamefield {
 		TICK = 3,
 		EXIT = 4,
 		HELP = 5
+	};
+
+	enum gameModes {
+		ONLINE_MODE = 1,
+		DEFAULT_MODE = 2,
+		OFFLINE_MODE = 3
 	};
 
 	class GameField {
@@ -76,15 +84,15 @@ namespace gamefield {
 		GameField& operator=(const GameField& a);
 		~GameField();
 		void makeIteration(GameField& map);
-		void iterate(int count);
+		void iterate(int count, int silence = NO_SILENCE);
 		std::vector<std::vector<char>> return_map();
 		void dump(std::string output_file);
 		void run();
 	};
 
-	const int DEFAULT_ITERATIONS = 10;
+	const int DEFAULT_ITERATIONS = 0;
 	const std::string DEFAULT_OUTPUT_FILENAME = "defaultOutput.txt";
-	const std::string DEFAULT_INPUT_FILENAME = "defaultInput.txt";
+	const std::string DEFAULT_INPUT_FILENAME = "defaultUniverse.txt";
 
 	class ArgsContainer {
 		gamefield::GameField buf_field;

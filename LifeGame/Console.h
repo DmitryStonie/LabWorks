@@ -50,7 +50,7 @@ namespace console {
 	const std::string DUMP_STR = "dump ";
 	const std::string HELP_STR = "help";
 	const std::string EXIT_STR = "exit";
-	const std::string TICK_STR = "tick";
+	const std::string TICK_STR = "tick ";
 	const std::string T_STR = "t";
 	const std::string LEFTARROW = "<";
 	const std::string RIGHTARROW = ">";

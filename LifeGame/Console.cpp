@@ -31,7 +31,7 @@ void console::Console::writeError(int errorId) {
 		{NO_FILENAME, "Ошибка : не указан файл для дампа."},
 		{NO_TICKS, "Ошибка : не указано количество тиков."},
 		{WRONG_TICKS, "Ошибка : неправильно указано значение тиков."},
-		{WRONG_COMMAND, "Ошибка : неправильная команда. Для подсказки используйте команду help."}
+		{WRONG_OPTION, "Ошибка : неправильная команда. Для подсказки используйте команду help."}
 	};
 	std::cerr << errors[errorId] << std::endl;
 }
@@ -52,7 +52,7 @@ void console::Console::printMap(std::vector<std::vector<char>> field, int height
 
 int console::Console::read_command(std::string &argument) {
 	std::string input, tmp;
-	std::cin >> input;
+	getline(std::cin, input);
 	tmp = input.substr(0, COMMAND_LENGTH);
 	if (tmp == DUMP_STR) {
 		if (input.find(LEFTARROW, 0) == std::string::npos || input.find(RIGHTARROW, 0) == std::string::npos) return WRONG_COMMAND;
