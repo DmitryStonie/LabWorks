@@ -40,10 +40,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="defaultUniverse.txt">
+    <Text Include="glider.txt">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="pentadecathlon.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="gosperglidergun.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="25p3h1v01.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="acorn.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -139,7 +139,10 @@
     <ClInclude Include="ArgsContainer.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="defaultUniverse.txt" />
+    <Text Include="25p3h1v01.txt" />
+    <Text Include="acorn.txt" />
+    <Text Include="glider.txt" />
+    <Text Include="gosperglidergun.txt" />
     <Text Include="pentadecathlon.txt" />
   </ItemGroup>
   <ItemGroup>
