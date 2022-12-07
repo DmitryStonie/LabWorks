@@ -140,6 +140,7 @@
     <Text Include="25p3h1v01.txt" />
     <Text Include="acorn.txt" />
     <Text Include="dartship.txt" />
+    <Text Include="defaultUniverse.txt" />
     <Text Include="glider.txt" />
     <Text Include="gosperglidergun.txt" />
     <Text Include="pentadecathlon.txt" />

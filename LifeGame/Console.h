@@ -5,6 +5,13 @@
 #include <map>
 
 namespace console {
+	//command codes
+	const int WRONG_COMMAND = 1;
+	const int DUMP = 2;
+	const int TICK = 3;
+	const int EXIT = 4;
+	const int HELP = 5;
+	const int COMMAND_LENGTH = 5;
 	const int ALIVE_CELL = 1;
 	//error codes
 	const int CANNOT_OPEN_FILE = 9;
@@ -21,13 +28,6 @@ namespace console {
 	const int NO_TICKS = 30;
 	const int WRONG_TICKS = 31;
 	const int WRONG_OPTION = 32;
-	//command codes
-	const int WRONG_COMMAND = 1,
-	const int DUMP = 2;
-	const int TICK = 3;
-	const int EXIT = 4;
-	const int HELP = 5;
-	const int COMMAND_LENGTH = 5;
 	//command constants
 	const std::string DUMP_STR = "dump ";
 	const std::string HELP_STR = "help";
@@ -43,7 +43,7 @@ namespace console {
 	class Console {
 		std::map<int, const std::string> errors = {
 			{CANNOT_OPEN_FILE, "Error: can't open file."},
-			{MULTIPLE_FILE_FORMAT, "Error: wrong file format."},
+			{MULTIPLE_FILE_FORMAT, "Error: multiple file format. "},
 			{WRONG_UNIVERSE_NAME, "Error: wrong universe name."},
 			{MULTIPLE_UNIVERSE_NAME, "Error: multiple universe name. Used first name."},
 			{WRONG_RULES_FORMAT, "Error: wrong rules format."},

@@ -6,56 +6,50 @@
 #include <iostream>
 #include <map>
 #include <boost/program_options.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 namespace po = boost::program_options;
 
 namespace gamefield {
+	//default values
 	const std::set<int> DEFAULT_SURVIVE_RULE{ 2, 3 };
 	const std::set<int> DEFAULT_BIRTH_RULE{ 3 };
-	const int DEFAULT_WIDTH = 72;
-	const int DEFAULT_HEIGHT = 48;
-	const int NON_CRITICAL_ERROR = 2;
-	const int CRITICAL_ERROR = 3;
-	const int RULES_ENTERED = 4;
+	const std::string DEFAULT_UNIVERSE_NAME = ("DefaultUniverseName");
+	const int DEFAULT_WIDTH = 15;
+	const int DEFAULT_HEIGHT = 15;
+	//cells
 	const int ALIVE_CELL = 1;
 	const int DEAD_CELL = 0;
-	const std::string DEFAULT_UNIVERSE_NAME = ("DefaultUniverseName");
-	const std::string FILE_FORMAT = "#Life 1.06";
-	const std::string UNIVERSE_NAME_SPEC = "#N ";
-	const std::string RULES_SPEC = "#R ";
-	const int NUM_OF_INIT_LINES = 3;
-	const int CURRENT_POS = 3;
-	const int SPEC_LENGTH = 3;
+
+	//for file parser
+	const int NON_CRITICAL_ERROR = 2;
+	const int CRITICAL_ERROR = 3;
+	const int NO_SURVIVE_RULE_ERROR = 4;
+	const int RULES_ENTERED = 5;
+	static const std::string FILE_FORMAT = "#Life 1.06";
+	static const std::string UNIVERSE_NAME_SPEC = "#N ";
+	static const std::string RULES_SPEC = "#R ";
+	const char SLASH = '/';
 	const char BIRTH_LETTER = 'B';
 	const char SURVIVE_LETTER = 'S';
-	const char LOWEST_RULE_NUMBER = '0';
-	const char HIGHEST_RULE_NUMBER = '8';
+
+	const int SPEC_LENGTH = 3;
 	const char CHAR_TO_NUM_COEF = 48;
-	const int NOT_ENTERED = 0;
-	const int ENTERED = 1;
-	const int NO_SURVIVE_RULE_ERROR = 2;
-	const char SLASH = '/';
-	const std::string SUCCESFUL_DUMP = "Dump completed!\n";
+	const int END_OF_PROGRAMM = 1;
+
+	//commands messages
+	const std::string SUCCESFUL_DUMP_MESSAGE = "Dump completed!\n";
 	const std::string HELP_MESSAGE = "This is a help message\n";
 	const std::string EXIT_MESSAGE = "End of the program...\n";
-	const int END_OF_PROGRAMM = 1;
+
+	//iterate mode
 	const int SILENCE = 1;
 	const int NO_SILENCE = 0;
 
-	enum commandCodes {
-		WRONG_COMMAND = 1,
-		DUMP = 2,
-		TICK = 3,
-		EXIT = 4,
-		HELP = 5
-	};
+	//gamemodes
+	const int ONLINE_MODE = 1;
+	const int DEFAULT_MODE = 2;
+	const int OFFLINE_MODE = 3;
 
-	enum gameModes {
-		ONLINE_MODE = 1,
-		DEFAULT_MODE = 2,
-		OFFLINE_MODE = 3
-	};
 
 	class GameField {
 		std::vector<std::vector<char>> field;
@@ -80,9 +74,9 @@ namespace gamefield {
 		friend class ArgsContainer;
 	public:
 		GameField();
+		~GameField();
 		GameField(std::string input_filename);
 		GameField& operator=(const GameField& a);
-		~GameField();
 		void makeIteration(GameField& map);
 		void iterate(int count, int silence = NO_SILENCE);
 		std::vector<std::vector<char>> return_map();

@@ -1,15 +1,9 @@
-#include <vector>
 #include <fstream>
-#include <set>
-#include <iterator>
-#include <iostream>
-
 #include "GameField.h"
 #include "Console.h"
 
 namespace gf = gamefield;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 
 using namespace console;
 
@@ -19,6 +13,7 @@ gf::GameField::GameField() {
 	field.resize(height, std::vector<char>(width, DEAD_CELL));
 	survive_rule = DEFAULT_SURVIVE_RULE;
 	birth_rule = DEFAULT_BIRTH_RULE;
+	universe_name = DEFAULT_UNIVERSE_NAME;
 }
 
 gf::GameField::GameField(std::string input_filename) {
@@ -27,9 +22,12 @@ gf::GameField::GameField(std::string input_filename) {
 	int tmp = 0;
 	if (!inf) {
 		errout.writeError(CANNOT_OPEN_FILE);
+		width = DEFAULT_WIDTH;
+		height = DEFAULT_HEIGHT;
 		field.resize(height, std::vector<char>(width, DEAD_CELL));	//not good, need own map
 		survive_rule = DEFAULT_SURVIVE_RULE;
 		birth_rule = DEFAULT_BIRTH_RULE;
+		universe_name = DEFAULT_UNIVERSE_NAME;
 	}
 	else {
 		input_header(inf, *this);
@@ -49,10 +47,14 @@ gf::GameField::~GameField() {
 
 
 void gf::GameField::input_header(std::ifstream& inf, GameField& map) {
+	static const int NOT_ENTERED = 0;
+	static const int ENTERED = 1;
+	static const int LINES_IN_HEADER = 3;
+	static const int SPEC_LENGTH = 3;
 	Console errout;
 	std::string strInput;
 	int is_format = NOT_ENTERED, is_name = NOT_ENTERED, is_rule = NOT_ENTERED, line_index = 0, tmp = 0;
-	for (; (line_index < NUM_OF_INIT_LINES) && getline(inf, strInput); line_index++) {
+	for (; (line_index < LINES_IN_HEADER) && getline(inf, strInput); line_index++) {
 		if (strInput == FILE_FORMAT) {
 			if (is_format == NOT_ENTERED) is_format = ENTERED;
 			else {
@@ -102,7 +104,10 @@ void gf::GameField::input_header(std::ifstream& inf, GameField& map) {
 }
 
 int gf::GameField::input_rules(std::string source, GameField &map) {
-	int pos = CURRENT_POS;
+	const char LOWEST_RULE_NUMBER = '0';
+	const char HIGHEST_RULE_NUMBER = '8';
+
+	int pos = SPEC_LENGTH;
 	if (source[pos] != BIRTH_LETTER) {
 		return CRITICAL_ERROR;
 	}
@@ -166,6 +171,10 @@ gf::GameField& gf::GameField::operator=(const GameField& a) {
 	birth_rule = a.birth_rule;
 	universe_name = a.universe_name;
 	field = a.field;
+	iterations = a.iterations;
+	mode = a.mode;
+	input_file = a.input_file;
+	output_file = a.output_file;
 	return *this;
 }
 
@@ -194,7 +203,7 @@ inline int gf::GameField::count_center_neighbours(int x, int y, GameField& map) 
 		+ map.field[x][y + 1] + map.field[x][y - 1]);
 }
 
-inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) {//there mistake
+inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) {
 	return (map.field[(x + 1 + map.height) % map.height][(y + map.width) % map.width]
 		+ map.field[(x - 1 + map.height) % map.height][(y + map.width) % map.width]
 		+ map.field[(x + 1 + map.height) % map.height][(y + 1 + map.width) % map.width]
@@ -281,35 +290,35 @@ void gf::GameField::run() {
 	for (;end_of_programm != END_OF_PROGRAMM;) {
 		returned_code = coutput.read_command(argument);
 		switch (returned_code) {
-		case DUMP:
-			if (argument.length() == 0) {
-				coutput.writeError(NO_FILENAME);
+			case DUMP:
+				if (argument.length() == 0) {
+					coutput.writeError(NO_FILENAME);
+					break;
+				}
+				(*this).dump(argument);
+				coutput.writeMessage(SUCCESFUL_DUMP_MESSAGE);
 				break;
-			}
-			(*this).dump(argument);
-			coutput.writeMessage(SUCCESFUL_DUMP);
-			break;
-		case HELP:
-			coutput.writeMessage(HELP_MESSAGE);
-			break;
-		case EXIT:
-			coutput.writeMessage(EXIT_MESSAGE);
-			end_of_programm = END_OF_PROGRAMM;
-			break;
-		case TICK:
-			if (argument.length() == 0) {
-				coutput.writeError(NO_TICKS);
+			case HELP:
+				coutput.writeMessage(HELP_MESSAGE);
 				break;
-			}
-			ticks = std::stoi(argument);
-			if (ticks <= 0) {
-				coutput.writeError(WRONG_TICKS);
+			case EXIT:
+				coutput.writeMessage(EXIT_MESSAGE);
+				end_of_programm = END_OF_PROGRAMM;
 				break;
-			}
-			iterate(ticks);
-			break;
-		default:
-			coutput.writeError(WRONG_OPTION);
+			case TICK:
+				if (argument.length() == 0) {
+					coutput.writeError(NO_TICKS);
+					break;
+				}
+				ticks = std::stoi(argument);
+				if (ticks <= 0) {
+					coutput.writeError(WRONG_TICKS);
+					break;
+				}
+				iterate(ticks);
+				break;
+			default:
+				coutput.writeError(WRONG_OPTION);
 		}
 	}
 }
