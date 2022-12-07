@@ -1,4 +1,4 @@
-#include "ArgsContainer.h"
+/*#include "ArgsContainer.h"
 
 
 namespace po = boost::program_options;
@@ -38,6 +38,4 @@ ac::ArgsContainer::~ArgsContainer() {
 
 }
 
-void ac::ArgsContainer::gameFieldInitialization(gamefield::GameField& map) {
-
-}
+*/

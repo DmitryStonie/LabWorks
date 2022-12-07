@@ -2,6 +2,13 @@
 #include <vector>
 #include <string>
 #include <set> 
+#include <string>
+#include <iostream>
+#include <map>
+#include <boost/program_options.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+namespace po = boost::program_options;
 
 namespace gamefield {
 	const std::set<int> DEFAULT_SURVIVE_RULE{ 2, 3 };
@@ -29,6 +36,10 @@ namespace gamefield {
 	const int ENTERED = 1;
 	const int NO_SURVIVE_RULE_ERROR = 2;
 	const char SLASH = '/';
+	const std::string SUCCESFUL_DUMP = "Dump completed!\n";
+	const std::string HELP_MESSAGE = "This is a help message\n";
+	const std::string EXIT_MESSAGE = "End of the program...\n";
+	const int END_OF_PROGRAMM = 1;
 
 	enum commandCodes {
 		WRONG_COMMAND = 1,
@@ -57,15 +68,35 @@ namespace gamefield {
 		inline int count_border_neighbours(int x, int y, GameField& map);
 		inline void update_center_cell(int x, int y, GameField& map, GameField& tmp_map);
 		inline void update_border_cell(int x, int y, GameField& map, GameField& tmp_map);
+
+		friend class ArgsContainer;
 	public:
 		GameField();
 		GameField(std::string input_filename);
 		GameField& operator=(const GameField& a);
 		~GameField();
 		void makeIteration(GameField& map);
-		void iterate(int& current_iteration, int count);
+		void iterate(int count);
 		std::vector<std::vector<char>> return_map();
 		void dump(std::string output_file);
 		void run();
 	};
+
+	const int DEFAULT_ITERATIONS = 10;
+	const std::string DEFAULT_OUTPUT_FILENAME = "defaultOutput.txt";
+	const std::string DEFAULT_INPUT_FILENAME = "defaultInput.txt";
+
+	class ArgsContainer {
+		gamefield::GameField buf_field;
+		po::options_description desc;
+		po::positional_options_description pos_desc;
+		po::variables_map var_map;
+		po::variables_map pos_map;
+	public:
+		ArgsContainer();
+		~ArgsContainer();
+		ArgsContainer(int argc, char** argv);
+		void gameFieldInitialization(gamefield::GameField& map);
+	};
 }
+

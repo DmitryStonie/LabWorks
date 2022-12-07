@@ -28,11 +28,15 @@ void console::Console::writeError(int errorId) {
 		{NO_FILE_FORMAT,"Ошибка : не указан формат файла."},
 		{NO_UNIVERSE_NAME,"Ошибка : не указано название вселенной. Использовано значение по умолчанию."},
 		{NO_GAME_RULES,"Ошибка : не указаны правила игры. Использованы значения по умолчанию."},
+		{NO_FILENAME, "Ошибка : не указан файл для дампа."},
+		{NO_TICKS, "Ошибка : не указано количество тиков."},
+		{WRONG_TICKS, "Ошибка : неправильно указано значение тиков."},
+		{WRONG_COMMAND, "Ошибка : неправильная команда. Для подсказки используйте команду help."}
 	};
 	std::cerr << errors[errorId] << std::endl;
 }
 
-void console::Console::printMap(std::vector<std::vector<int>> field, int height, int width) {
+void console::Console::printMap(std::vector<std::vector<char>> field, int height, int width) {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			if (field[i][j] == ALIVE_CELL) {
@@ -69,4 +73,8 @@ int console::Console::read_command(std::string &argument) {
 	else {
 		return WRONG_COMMAND;
 	}
+}
+
+void console::Console::writeMessage(std::string message) {
+	std::cout << message;
 }

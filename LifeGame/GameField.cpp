@@ -1,12 +1,17 @@
 #include <vector>
-#include "GameField.h"
-#include "Console.h"
 #include <fstream>
 #include <set>
 #include <iterator>
 #include <iostream>
 
+#include "GameField.h"
+#include "Console.h"
+#include "ArgsContainer.h"
+
 namespace gf = gamefield;
+namespace po = boost::program_options;
+namespace fs = boost::filesystem;
+
 using namespace console;
 
 gf::GameField::GameField() {
@@ -219,9 +224,9 @@ inline void gf::GameField::update_border_cell(int x, int y, GameField& map, Game
 	}
 }
 
-void gf::GameField::iterate(int &current_iteration, int count) {
+void gf::GameField::iterate(int count) {
 	Console show_map;
-	current_iteration += count;
+	iterations += count;
 	std::cout << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
 	for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
 		std::cout << (char)(*birth_num + CHAR_TO_NUM_COEF);
@@ -230,11 +235,11 @@ void gf::GameField::iterate(int &current_iteration, int count) {
 	for (std::set<int>::iterator survive_num = survive_rule.begin(); survive_num != survive_rule.end(); ++survive_num) {
 		std::cout << (char)(*survive_num + CHAR_TO_NUM_COEF);
 	}
-	std::cout << '\n' << current_iteration << '\n';
+	std::cout << '\n' << iterations << '\n';
 	for (int i = 0; i < count; i++) {
 		makeIteration(*this);
 	}
-	show_map.printMap(*this);
+	show_map.printMap(return_map(), height, width);
 }
 
 std::vector<std::vector<char>> gf::GameField::return_map() {
@@ -242,21 +247,21 @@ std::vector<std::vector<char>> gf::GameField::return_map() {
 	return map_copy;
 }
 
-void gf::GameField::dump() {
+void gf::GameField::dump(std::string output_file) {
 	std::ofstream fout;
 	fout.open(input_file);
-	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << map.universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
-	for (std::set<int>::iterator birth_num = map.birth_rule.begin(); birth_num != map.birth_rule.end(); ++birth_num) {
+	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
+	for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
 		fout << (char)(*birth_num + CHAR_TO_NUM_COEF);
 	}
 	fout << SLASH << SURVIVE_LETTER;
-	for (std::set<int>::iterator survive_num = map.survive_rule.begin(); survive_num != map.survive_rule.end(); ++survive_num) {
+	for (std::set<int>::iterator survive_num = survive_rule.begin(); survive_num != survive_rule.end(); ++survive_num) {
 		fout << (char)(*survive_num + CHAR_TO_NUM_COEF);
 	}
 	fout << '\n';
-	for (int i = 0; i < map.height; i++) {
-		for (int j = 0; j < map.width; j++) {
-			if (map.field[i][j] == ALIVE_CELL) {
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			if (field[i][j] == ALIVE_CELL) {
 				fout << i << " " << j << '\n';
 			}
 		}
@@ -267,16 +272,78 @@ void gf::GameField::dump() {
 void gf::GameField::run() {
 	Console coutput;
 	std::string argument;
-	int returned_code = 0;
-	for (;;) {
+	int returned_code = 0, ticks = 0, end_of_programm = 0;
+	for (;end_of_programm != END_OF_PROGRAMM;) {
 		returned_code = coutput.read_command(argument);
 		switch (returned_code) {
 		case DUMP:
+			if (argument.length() == 0) {
+				coutput.writeError(NO_FILENAME);
+				break;
+			}
 			(*this).dump(argument);
+			coutput.writeMessage(SUCCESFUL_DUMP);
 			break;
 		case HELP:
-
+			coutput.writeMessage(HELP_MESSAGE);
 			break;
+		case EXIT:
+			coutput.writeMessage(EXIT_MESSAGE);
+			end_of_programm = END_OF_PROGRAMM;
+			break;
+		case TICK:
+			if (argument.length() == 0) {
+				coutput.writeError(NO_TICKS);
+				break;
+			}
+			ticks = std::stoi(argument);
+			if (ticks <= 0) {
+				coutput.writeError(WRONG_TICKS);
+				break;
+			}
+			iterate(ticks);
+			break;
+		default:
+			coutput.writeError(WRONG_OPTION);
 		}
 	}
+}
+
+gf::ArgsContainer::ArgsContainer() {
+
+}
+
+gf::ArgsContainer::~ArgsContainer() {
+
+}
+
+gf::ArgsContainer::ArgsContainer(int argc, char** argv) {
+	gamefield::GameField tmp_map;
+	po::options_description desc("Allowed options:");
+	desc.add_options()
+		("help", "Writes help message")
+		("iterations,i", po::value<int>(&tmp_map.iterations)->default_value(DEFAULT_ITERATIONS), "Number of universe iterations")
+		("input", po::value<std::string>(&tmp_map.input_file)->default_value(DEFAULT_INPUT_FILENAME), "Name of file for input")
+		("output,o", po::value<std::string>(&tmp_map.output_file)->default_value(DEFAULT_OUTPUT_FILENAME), "Name of file for output")
+		;
+
+	po::variables_map var_map;
+	po::store(po::parse_command_line(argc, argv, desc), var_map);
+	po::notify(var_map);
+	if (var_map.count("help")) {
+		std::cout << desc << '\n';
+	}
+
+	po::positional_options_description desc_pos;
+	desc_pos.add("input", -1);
+
+	po::variables_map pos_map;
+	po::store(po::command_line_parser(argc, argv).options(desc).positional(desc_pos).run(), pos_map);
+	po::notify(pos_map);
+}
+
+void gf::ArgsContainer::gameFieldInitialization(gamefield::GameField& map) {
+	map.iterations = buf_field.iterations;
+	map.input_file = buf_field.input_file;
+	map.output_file = buf_field.output_file;
 }

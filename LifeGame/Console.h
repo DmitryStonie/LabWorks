@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
-#include "GameField.h"
+#include <vector>
 
 namespace console {
 	enum errorsCodes {
@@ -32,7 +32,11 @@ namespace console {
 		MULTIPLE_SURVIVAL_RULE = 25,
 		WRONG_SURVIVAL_RULE_FORMAT = 26,
 		MULTIPLE_ALIVE_CELL = 27,
-		WRONG_RULE_FORMAT_DEFAULT = 28
+		WRONG_RULE_FORMAT_DEFAULT = 28,
+		NO_FILENAME = 29,
+		NO_TICKS = 30,
+		WRONG_TICKS = 31,
+		WRONG_OPTION = 32
 	};
 	enum commandCodes {
 		WRONG_COMMAND = 1,
@@ -50,13 +54,14 @@ namespace console {
 	const std::string T_STR = "t";
 	const std::string LEFTARROW = "<";
 	const std::string RIGHTARROW = ">";
-	//std::map<std::string> 
+
 	class Console {
 	public:
 		Console();
 		~Console();
 		void writeError(int errorId);
+		void writeMessage(std::string message);
 		int read_command(std::string& argument);
-		void printMap(std::vector<std::vector<int>> field, int height, int width);
+		void printMap(std::vector<std::vector<char>> field, int height, int width);
 	};
 }
