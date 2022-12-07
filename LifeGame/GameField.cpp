@@ -6,7 +6,6 @@
 
 #include "GameField.h"
 #include "Console.h"
-#include "ArgsContainer.h"
 
 namespace gf = gamefield;
 namespace po = boost::program_options;
