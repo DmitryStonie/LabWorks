@@ -130,20 +130,20 @@
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="GameField.cpp" />
-    <ClCompile Include="InputArgs.cpp" />
     <ClCompile Include="LifeGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console.h" />
     <ClInclude Include="GameField.h" />
-    <ClInclude Include="ArgsContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="25p3h1v01.txt" />
     <Text Include="acorn.txt" />
+    <Text Include="dartship.txt" />
     <Text Include="glider.txt" />
     <Text Include="gosperglidergun.txt" />
     <Text Include="pentadecathlon.txt" />
+    <Text Include="snacker.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

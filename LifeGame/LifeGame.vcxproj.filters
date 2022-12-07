@@ -24,18 +24,12 @@
     <ClCompile Include="Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputArgs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameField.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Console.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ArgsContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,6 +47,12 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="acorn.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="dartship.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="snacker.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
