@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include <boost/program_options.hpp>
+#include "../GameTest/pch.h"
 
 namespace po = boost::program_options;
 
@@ -72,6 +73,9 @@ namespace gamefield {
 		inline void update_border_cell(int x, int y, GameField& map, GameField& tmp_map);
 
 		friend class ArgsContainer;
+		friend class GameFieldTest;
+		FRIEND_TEST(TestGameField, run);
+
 	public:
 		GameField();
 		~GameField();

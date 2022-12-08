@@ -58,6 +58,9 @@
     <Text Include="defaultUniverse.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="test.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
