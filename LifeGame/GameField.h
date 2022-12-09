@@ -49,62 +49,64 @@ const int ONLINE_MODE = 1;
 const int DEFAULT_MODE = 2;
 const int OFFLINE_MODE = 3;
 
+namespace gamefield {
+	class GameField {
+		friend class GameFieldTest;
+		FRIEND_TEST(TestSuite, poswidth);
+		FRIEND_TEST(TestSuite, negwidth);
+		FRIEND_TEST(TestSuite, toroidal);
+		FRIEND_TEST(TestSuite, update_cells);
+		FRIEND_TEST(TestSuite, dump_file);
+		FRIEND_TEST(TestSuite, long_run);
+		FRIEND_TEST(TestSuite, open_files);
+		FRIEND_TEST(TestSuite, multiple_data);
 
-class GameField {
-	FRIEND_TEST(TestSuite, poswidth);
-	FRIEND_TEST(TestSuite, negwidth);
-	FRIEND_TEST(TestSuite, toroidal);
-	FRIEND_TEST(TestSuite, update_cells);
-	FRIEND_TEST(TestSuite, dump_file);
-	FRIEND_TEST(TestSuite, long_run);
-	FRIEND_TEST(TestSuite, default_file);
+		std::vector<std::vector<char>> field;
+		std::string universe_name;
+		std::set<int> survive_rule;
+		std::set<int> birth_rule;
+		std::string input_file;
+		std::string output_file;
+		int width;
+		int height;
+		int iterations;
+		int mode;
+		int input_rules(std::string source, GameField& map);
+		void input_header(std::ifstream& inf, GameField& map);
+		void input_cells(std::ifstream& inf, GameField& map);
+		void calculate_size(std::ifstream& inf, GameField& map);
+		inline int count_center_neighbours(int x, int y, GameField& map);
+		inline int count_border_neighbours(int x, int y, GameField& map);
+		inline void update_center_cell(int x, int y, GameField& map, GameField& tmp_map);
+		inline void update_border_cell(int x, int y, GameField& map, GameField& tmp_map);
 
-	std::vector<std::vector<char>> field;
-	std::string universe_name;
-	std::set<int> survive_rule;
-	std::set<int> birth_rule;
-	std::string input_file;
-	std::string output_file;
-	int width;
-	int height;
-	int iterations;
-	int mode;
-	int input_rules(std::string source, GameField& map);
-	void input_header(std::ifstream& inf, GameField& map);
-	void input_cells(std::ifstream& inf, GameField& map);
-	void calculate_size(std::ifstream& inf, GameField& map);
-	inline int count_center_neighbours(int x, int y, GameField& map);
-	inline int count_border_neighbours(int x, int y, GameField& map);
-	inline void update_center_cell(int x, int y, GameField& map, GameField& tmp_map);
-	inline void update_border_cell(int x, int y, GameField& map, GameField& tmp_map);
+		friend class ArgsContainer;
+	public:
+		GameField();
+		~GameField();
+		GameField(std::string input_filename);
+		GameField& operator=(const GameField& a);
+		void makeIteration(GameField& map);
+		void iterate(int count, int silence = NO_SILENCE);
+		std::vector<std::vector<char>> return_map();
+		void dump(std::string output_file);
+		void run();
+	};
 
-	friend class ArgsContainer;
-public:
-	GameField();
-	~GameField();
-	GameField(std::string input_filename);
-	GameField& operator=(const GameField& a);
-	void makeIteration(GameField& map);
-	void iterate(int count, int silence = NO_SILENCE);
-	std::vector<std::vector<char>> return_map();
-	void dump(std::string output_file);
-	void run();
-};
+	const int DEFAULT_ITERATIONS = 0;
+	const std::string DEFAULT_OUTPUT_FILENAME = "defaultOutput.txt";
+	const std::string DEFAULT_INPUT_FILENAME = "defaultUniverse.txt";
 
-const int DEFAULT_ITERATIONS = 0;
-const std::string DEFAULT_OUTPUT_FILENAME = "defaultOutput.txt";
-const std::string DEFAULT_INPUT_FILENAME = "defaultUniverse.txt";
-
-class ArgsContainer {
-	GameField buf_field;
-	po::options_description desc;
-	po::positional_options_description pos_desc;
-	po::variables_map var_map;
-	po::variables_map pos_map;
-public:
-	ArgsContainer();
-	~ArgsContainer();
-	ArgsContainer(int argc, char** argv);
-	void gameFieldInitialization(GameField& map);
-};
-
+	class ArgsContainer {
+		GameField buf_field;
+		po::options_description desc;
+		po::positional_options_description pos_desc;
+		po::variables_map var_map;
+		po::variables_map pos_map;
+	public:
+		ArgsContainer();
+		~ArgsContainer();
+		ArgsContainer(int argc, char** argv);
+		void gameFieldInitialization(GameField& map);
+	};
+}

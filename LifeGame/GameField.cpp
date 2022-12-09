@@ -4,8 +4,9 @@
 
 namespace po = boost::program_options;
 namespace cs = console;
+namespace gf = gamefield;
 
-GameField::GameField() {
+gf::GameField::GameField() {
 	width = DEFAULT_WIDTH;
 	height = DEFAULT_HEIGHT;
 	field.resize(height, std::vector<char>(width, DEAD_CELL));
@@ -15,11 +16,20 @@ GameField::GameField() {
 	iterations = DEFAULT_ITERATIONS;
 }
 
-GameField::GameField(std::string input_filename) {
+gf::GameField::GameField(std::string input_filename) {
 	cs::Console errout;
 	std::ifstream inf(input_filename);
 	int tmp = 0;
-	if (!inf) {
+	if (inf.is_open()) {
+		input_header(inf, *this);
+		int current_pos = inf.tellg();
+		calculate_size(inf, *this);
+		inf.clear();
+		inf.seekg(0, std::ios_base::beg);
+		field.resize(height, std::vector<char>(width, DEAD_CELL));
+		input_cells(inf, *this);
+	}
+	else {
 		errout.writeError(cs::CANNOT_OPEN_FILE);
 		width = DEFAULT_WIDTH;
 		height = DEFAULT_HEIGHT;
@@ -29,23 +39,14 @@ GameField::GameField(std::string input_filename) {
 		universe_name = DEFAULT_UNIVERSE_NAME;
 		iterations = DEFAULT_ITERATIONS;
 	}
-	else {
-		input_header(inf, *this);
-		int current_pos = inf.tellg();
-		calculate_size(inf, *this);
-		inf.clear();
-		inf.seekg(0, std::ios_base::beg);
-		field.resize(height, std::vector<char>(width, DEAD_CELL));
-		input_cells(inf, *this);
-	}
 	inf.close();
 }
 
-GameField::~GameField() {
+gf::GameField::~GameField() {
 
 }
 
-void GameField::input_header(std::ifstream& inf, GameField& map) {
+void gf::GameField::input_header(std::ifstream& inf, GameField& map) {
 	static const int NOT_ENTERED = 0;
 	static const int ENTERED = 1;
 	static const int LINES_IN_HEADER = 3;
@@ -102,7 +103,7 @@ void GameField::input_header(std::ifstream& inf, GameField& map) {
 	}
 }
 
-int GameField::input_rules(std::string source, GameField &map) {
+int gf::GameField::input_rules(std::string source, GameField &map) {
 	const char LOWEST_RULE_NUMBER = '0';
 	const char HIGHEST_RULE_NUMBER = '8';
 
@@ -132,18 +133,18 @@ int GameField::input_rules(std::string source, GameField &map) {
 	return RULES_ENTERED;
 }
 
-void GameField::calculate_size(std::ifstream& inf, GameField& map) {
-	int y_cor = 0, x_cor = 0;
+void gf::GameField::calculate_size(std::ifstream& inf, GameField& map) {
+	int cor1 = 0, cor2 = 0;
 	std::string strInput;
 	for (; getline(inf, strInput);) {
-		if (sscanf(strInput.data(), "%d %d", &y_cor, &x_cor) == 2) {
-			y_cor = abs(y_cor);
-			x_cor = abs(x_cor);
-			if (y_cor > map.width) {
-				map.width = y_cor;
+		if (sscanf(strInput.data(), "%d %d", &cor1, &cor2) == 2) {
+			cor1 = abs(cor1);
+			cor2 = abs(cor2);
+			if (cor1 > map.height) {
+				map.height = cor1;
 			}
-			if (x_cor > map.height) {
-				map.height = x_cor;
+			if (cor2 > map.width) {
+				map.width = cor2;
 			}
 		}
 	}
@@ -151,19 +152,19 @@ void GameField::calculate_size(std::ifstream& inf, GameField& map) {
 	map.width = map.width + 1;
 }
 
-void GameField::input_cells(std::ifstream& inf, GameField& map) {
-	int y_cor = 0, x_cor = 0;
+void gf::GameField::input_cells(std::ifstream& inf, GameField& map) {
+	int cor1 = 0, cor2 = 0;
 	std::string strInput;
 	for (; getline(inf, strInput);) {
-		if (sscanf(strInput.data(), "%d %d", &y_cor, &x_cor) == 2) {
-			if (y_cor < 0) y_cor = width + y_cor;
-			if (x_cor < 0) x_cor = height + x_cor;
-			map.field[x_cor][y_cor] = ALIVE_CELL;
+		if (sscanf(strInput.data(), "%d %d", &cor1, &cor2) == 2) {
+			if (cor1 < 0) cor1 = height + cor1;
+			if (cor2 < 0) cor2 = width + cor2;
+			map.field[cor1][cor2] = ALIVE_CELL;
 		}
 	}
 }
 
-GameField& GameField::operator=(const GameField& a) {
+gf::GameField& gf::GameField::operator=(const GameField& a) {
 	width = a.width;
 	height = a.height;
 	survive_rule = a.survive_rule;
@@ -177,7 +178,7 @@ GameField& GameField::operator=(const GameField& a) {
 	return *this;
 }
 
-void GameField::makeIteration(GameField& map) {
+void gf::GameField::makeIteration(GameField& map) {
 	static GameField tmp_map;
 	tmp_map = map;
 	for (int i = 1; i < map.height - 1; i++) {
@@ -195,14 +196,14 @@ void GameField::makeIteration(GameField& map) {
 	}
 }
 
-inline int GameField::count_center_neighbours(int x, int y, GameField& map) {
+inline int gf::GameField::count_center_neighbours(int x, int y, GameField& map) {
 	return (map.field[x + 1][y] + map.field[x - 1][y]
 		+ map.field[x + 1][y + 1] + map.field[x - 1][y + 1]
 		+ map.field[x + 1][y - 1] + map.field[x - 1][y - 1]
 		+ map.field[x][y + 1] + map.field[x][y - 1]);
 }
 
-inline int GameField::count_border_neighbours(int x, int y, GameField& map) {
+inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) {
 	return (map.field[(x + 1 + map.height) % map.height][(y + map.width) % map.width]
 		+ map.field[(x - 1 + map.height) % map.height][(y + map.width) % map.width]
 		+ map.field[(x + 1 + map.height) % map.height][(y + 1 + map.width) % map.width]
@@ -213,7 +214,7 @@ inline int GameField::count_border_neighbours(int x, int y, GameField& map) {
 		+ map.field[(x + map.height) % map.height][(y - 1 + map.width) % map.width]);
 }
 
-inline void GameField::update_center_cell(int x, int y, GameField& map, GameField& tmp_map) {
+inline void gf::GameField::update_center_cell(int x, int y, GameField& map, GameField& tmp_map) {
 	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_center_neighbours(x, y, tmp_map)) == 0) {
 		map.field[x][y] = DEAD_CELL;
 	}
@@ -222,7 +223,7 @@ inline void GameField::update_center_cell(int x, int y, GameField& map, GameFiel
 	}
 }
 
-inline void GameField::update_border_cell(int x, int y, GameField& map, GameField& tmp_map) {
+inline void gf::GameField::update_border_cell(int x, int y, GameField& map, GameField& tmp_map) {
 	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_border_neighbours(x, y, tmp_map)) == 0) {
 		map.field[x][y] = DEAD_CELL;
 	}
@@ -231,7 +232,7 @@ inline void GameField::update_border_cell(int x, int y, GameField& map, GameFiel
 	}
 }
 
-void GameField::iterate(int count, int silence) {
+void gf::GameField::iterate(int count, int silence) {
 	cs::Console show_map;
 	iterations += count;
 	if (silence == NO_SILENCE) {
@@ -251,15 +252,19 @@ void GameField::iterate(int count, int silence) {
 	}
 }
 
-std::vector<std::vector<char>> GameField::return_map() {
+std::vector<std::vector<char>> gf::GameField::return_map() {
 	std::vector<std::vector<char>> map_copy = field;
 	return map_copy;
 }
 
-void GameField::dump(std::string output_file) {
-	std::ofstream fout(output_file,std::ios_base::out);
-	if (fout.is_open()) {//return mistake
-		std::cout << "fileisopen\n";
+void gf::GameField::dump(std::string output_file) {
+	std::ofstream fout(output_file);
+	cs::Console errout;
+	if (fout.is_open() == 0) {
+		errout.writeError(cs::CANNOT_OPEN_FILE);
+		errout.writeMessage("Name of file:"+output_file);
+		fout.close();
+		return;
 	}
 	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
 	for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
@@ -281,7 +286,7 @@ void GameField::dump(std::string output_file) {
 	fout.close();
 }
 
-void GameField::run() {
+void gf::GameField::run() {
 	if (mode == DEFAULT_MODE) {
 		iterate(iterations, SILENCE);
 		(*this).dump(output_file);
@@ -325,15 +330,15 @@ void GameField::run() {
 	}
 }
 
-ArgsContainer::ArgsContainer() {
+gf::ArgsContainer::ArgsContainer() {
 
 }
 
-ArgsContainer::~ArgsContainer() {
+gf::ArgsContainer::~ArgsContainer() {
 
 }
 
-ArgsContainer::ArgsContainer(int argc, char** argv) {
+gf::ArgsContainer::ArgsContainer(int argc, char** argv) {
 	po::options_description desc("Allowed options:");
 	desc.add_options()
 		("help", "Writes help message")
@@ -365,7 +370,7 @@ ArgsContainer::ArgsContainer(int argc, char** argv) {
 	buf_field.iterations = var_map["iterations"].as<int>();
 }
 
-void ArgsContainer::gameFieldInitialization(GameField& map) {
+void gf::ArgsContainer::gameFieldInitialization(GameField& map) {
 	GameField tmp(buf_field.input_file);
 	map = tmp;
 	map.iterations = buf_field.iterations;

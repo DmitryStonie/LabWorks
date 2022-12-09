@@ -56,6 +56,17 @@
       <Project>{7da271c0-91a2-4e6a-95bb-553b6b1c6a25}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="tests\dump_file_in.txt" />
+    <Text Include="tests\dump_file_out.txt" />
+    <Text Include="tests\long_run.txt" />
+    <Text Include="tests\long_run_out.txt" />
+    <Text Include="tests\negwidth.txt" />
+    <Text Include="tests\poswidth.txt" />
+    <Text Include="tests\toroidal.txt" />
+    <Text Include="tests\update_cells_in.txt" />
+    <Text Include="tests\update_cells_out.txt" />
+  </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

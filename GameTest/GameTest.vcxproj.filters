@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="test.cpp" />
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Testfiles">
+      <UniqueIdentifier>{5625992d-72bf-45b1-ba95-ac004c9eaeac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="tests\dump_file_in.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\dump_file_out.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\long_run.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\long_run_out.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\negwidth.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\poswidth.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\toroidal.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\update_cells_in.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+    <Text Include="tests\update_cells_out.txt">
+      <Filter>Testfiles</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
