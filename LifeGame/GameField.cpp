@@ -2,32 +2,31 @@
 #include "GameField.h"
 #include "Console.h"
 
-namespace gf = gamefield;
 namespace po = boost::program_options;
-
-using namespace console;
-
-gf::GameField::GameField() {
+namespace cs = console;
+GameField::GameField() {
 	width = DEFAULT_WIDTH;
 	height = DEFAULT_HEIGHT;
 	field.resize(height, std::vector<char>(width, DEAD_CELL));
 	survive_rule = DEFAULT_SURVIVE_RULE;
 	birth_rule = DEFAULT_BIRTH_RULE;
 	universe_name = DEFAULT_UNIVERSE_NAME;
+	iterations = DEFAULT_ITERATIONS;
 }
 
-gf::GameField::GameField(std::string input_filename) {
-	Console errout;
+GameField::GameField(std::string input_filename) {
+	cs::Console errout;
 	std::ifstream inf(input_filename);
 	int tmp = 0;
 	if (!inf) {
-		errout.writeError(CANNOT_OPEN_FILE);
+		errout.writeError(cs::CANNOT_OPEN_FILE);
 		width = DEFAULT_WIDTH;
 		height = DEFAULT_HEIGHT;
 		field.resize(height, std::vector<char>(width, DEAD_CELL));	//not good, need own map
 		survive_rule = DEFAULT_SURVIVE_RULE;
 		birth_rule = DEFAULT_BIRTH_RULE;
 		universe_name = DEFAULT_UNIVERSE_NAME;
+		iterations = DEFAULT_ITERATIONS;
 	}
 	else {
 		input_header(inf, *this);
@@ -41,24 +40,23 @@ gf::GameField::GameField(std::string input_filename) {
 	inf.close();
 }
 
-gf::GameField::~GameField() {
+GameField::~GameField() {
 
 }
 
-
-void gf::GameField::input_header(std::ifstream& inf, GameField& map) {
+void GameField::input_header(std::ifstream& inf, GameField& map) {
 	static const int NOT_ENTERED = 0;
 	static const int ENTERED = 1;
 	static const int LINES_IN_HEADER = 3;
 	static const int SPEC_LENGTH = 3;
-	Console errout;
+	cs::Console errout;
 	std::string strInput;
 	int is_format = NOT_ENTERED, is_name = NOT_ENTERED, is_rule = NOT_ENTERED, line_index = 0, tmp = 0;
 	for (; (line_index < LINES_IN_HEADER) && getline(inf, strInput); line_index++) {
 		if (strInput == FILE_FORMAT) {
 			if (is_format == NOT_ENTERED) is_format = ENTERED;
 			else {
-				errout.writeError(MULTIPLE_FILE_FORMAT);
+				errout.writeError(cs::MULTIPLE_FILE_FORMAT);
 			}
 		}
 		else if (strInput.substr(0, SPEC_LENGTH) == UNIVERSE_NAME_SPEC) {
@@ -67,43 +65,43 @@ void gf::GameField::input_header(std::ifstream& inf, GameField& map) {
 				universe_name = strInput.substr(SPEC_LENGTH);
 			}
 			else {
-				errout.writeError(MULTIPLE_UNIVERSE_NAME);
+				errout.writeError(cs::MULTIPLE_UNIVERSE_NAME);
 			}
 		}
 		else if (strInput.substr(0, SPEC_LENGTH) == RULES_SPEC) {
 			if (is_rule == NOT_ENTERED && strInput.length() > SPEC_LENGTH) {
 				tmp = input_rules(strInput, *this);
 				if (tmp == CRITICAL_ERROR) {
-					errout.writeError(WRONG_RULES_FORMAT);
+					errout.writeError(cs::WRONG_RULES_FORMAT);
 					survive_rule = DEFAULT_SURVIVE_RULE;
 					birth_rule = DEFAULT_BIRTH_RULE;
 				}
 				else if (tmp == NO_SURVIVE_RULE_ERROR) {
-					errout.writeError(NO_SURVIVE_RULE);
+					errout.writeError(cs::NO_SURVIVE_RULE);
 					survive_rule = DEFAULT_SURVIVE_RULE;
 				}
 				is_rule = ENTERED;
 			}
 			else {
-				errout.writeError(MULTIPLE_RULES);
+				errout.writeError(cs::MULTIPLE_RULES);
 			}
 		}
 	}
 	if (is_format == NOT_ENTERED) {
-		errout.writeError(NO_FILE_FORMAT);
+		errout.writeError(cs::NO_FILE_FORMAT);
 	}
 	if (is_name == NOT_ENTERED) {
-		errout.writeError(NO_UNIVERSE_NAME);
+		errout.writeError(cs::NO_UNIVERSE_NAME);
 		universe_name = DEFAULT_UNIVERSE_NAME;
 	}
 	if (is_rule == NOT_ENTERED) {
-		errout.writeError(NO_GAME_RULES);
+		errout.writeError(cs::NO_GAME_RULES);
 		survive_rule = DEFAULT_SURVIVE_RULE;
 		birth_rule = DEFAULT_BIRTH_RULE;
 	}
 }
 
-int gf::GameField::input_rules(std::string source, GameField &map) {
+int GameField::input_rules(std::string source, GameField &map) {
 	const char LOWEST_RULE_NUMBER = '0';
 	const char HIGHEST_RULE_NUMBER = '8';
 
@@ -133,18 +131,18 @@ int gf::GameField::input_rules(std::string source, GameField &map) {
 	return RULES_ENTERED;
 }
 
-void gf::GameField::calculate_size(std::ifstream& inf, GameField& map) {
-	int x_cor = 0, y_cor = 0;
+void GameField::calculate_size(std::ifstream& inf, GameField& map) {
+	int y_cor = 0, x_cor = 0;
 	std::string strInput;
 	for (; getline(inf, strInput);) {
-		if (sscanf(strInput.data(), "%d %d", &x_cor, &y_cor) == 2) {
-			x_cor = abs(x_cor);
+		if (sscanf(strInput.data(), "%d %d", &y_cor, &x_cor) == 2) {
 			y_cor = abs(y_cor);
-			if (x_cor > map.width) {
-				map.width = x_cor;
+			x_cor = abs(x_cor);
+			if (y_cor > map.width) {
+				map.width = y_cor;
 			}
-			if (y_cor > map.height) {
-				map.height = y_cor;
+			if (x_cor > map.height) {
+				map.height = x_cor;
 			}
 		}
 	}
@@ -152,19 +150,19 @@ void gf::GameField::calculate_size(std::ifstream& inf, GameField& map) {
 	map.width = map.width + 1;
 }
 
-void gf::GameField::input_cells(std::ifstream& inf, GameField& map) {
-	int x_cor = 0, y_cor = 0;
+void GameField::input_cells(std::ifstream& inf, GameField& map) {
+	int y_cor = 0, x_cor = 0;
 	std::string strInput;
 	for (; getline(inf, strInput);) {
-		if (sscanf(strInput.data(), "%d %d", &x_cor, &y_cor) == 2) {
-			if (x_cor < 0) x_cor = width + x_cor;
-			if (y_cor < 0) y_cor = height + y_cor;
-			map.field[y_cor][x_cor] = ALIVE_CELL;
+		if (sscanf(strInput.data(), "%d %d", &y_cor, &x_cor) == 2) {
+			if (y_cor < 0) y_cor = width + y_cor;
+			if (x_cor < 0) x_cor = height + x_cor;
+			map.field[x_cor][y_cor] = ALIVE_CELL;
 		}
 	}
 }
 
-gf::GameField& gf::GameField::operator=(const GameField& a) {
+GameField& GameField::operator=(const GameField& a) {
 	width = a.width;
 	height = a.height;
 	survive_rule = a.survive_rule;
@@ -178,7 +176,7 @@ gf::GameField& gf::GameField::operator=(const GameField& a) {
 	return *this;
 }
 
-void gf::GameField::makeIteration(GameField& map) {
+void GameField::makeIteration(GameField& map) {
 	static GameField tmp_map;
 	tmp_map = map;
 	for (int i = 1; i < map.height - 1; i++) {
@@ -196,14 +194,14 @@ void gf::GameField::makeIteration(GameField& map) {
 	}
 }
 
-inline int gf::GameField::count_center_neighbours(int x, int y, GameField& map) {
+inline int GameField::count_center_neighbours(int x, int y, GameField& map) {
 	return (map.field[x + 1][y] + map.field[x - 1][y]
 		+ map.field[x + 1][y + 1] + map.field[x - 1][y + 1]
 		+ map.field[x + 1][y - 1] + map.field[x - 1][y - 1]
 		+ map.field[x][y + 1] + map.field[x][y - 1]);
 }
 
-inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) {
+inline int GameField::count_border_neighbours(int x, int y, GameField& map) {
 	return (map.field[(x + 1 + map.height) % map.height][(y + map.width) % map.width]
 		+ map.field[(x - 1 + map.height) % map.height][(y + map.width) % map.width]
 		+ map.field[(x + 1 + map.height) % map.height][(y + 1 + map.width) % map.width]
@@ -214,7 +212,7 @@ inline int gf::GameField::count_border_neighbours(int x, int y, GameField& map) 
 		+ map.field[(x + map.height) % map.height][(y - 1 + map.width) % map.width]);
 }
 
-inline void gf::GameField::update_center_cell(int x, int y, GameField& map, GameField& tmp_map) {
+inline void GameField::update_center_cell(int x, int y, GameField& map, GameField& tmp_map) {
 	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_center_neighbours(x, y, tmp_map)) == 0) {
 		map.field[x][y] = DEAD_CELL;
 	}
@@ -223,7 +221,7 @@ inline void gf::GameField::update_center_cell(int x, int y, GameField& map, Game
 	}
 }
 
-inline void gf::GameField::update_border_cell(int x, int y, GameField& map, GameField& tmp_map) {
+inline void GameField::update_border_cell(int x, int y, GameField& map, GameField& tmp_map) {
 	if (tmp_map.field[x][y] == ALIVE_CELL && tmp_map.survive_rule.count(count_border_neighbours(x, y, tmp_map)) == 0) {
 		map.field[x][y] = DEAD_CELL;
 	}
@@ -232,9 +230,10 @@ inline void gf::GameField::update_border_cell(int x, int y, GameField& map, Game
 	}
 }
 
-void gf::GameField::iterate(int count, int silence) {
-	Console show_map;
+void GameField::iterate(int count, int silence) {
+	cs::Console show_map;
 	iterations += count;
+	if (silence == NO_SILENCE) {
 	std::cout << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
 	for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
 		std::cout << (char)(*birth_num + CHAR_TO_NUM_COEF);
@@ -244,22 +243,23 @@ void gf::GameField::iterate(int count, int silence) {
 		std::cout << (char)(*survive_num + CHAR_TO_NUM_COEF);
 	}
 	std::cout << '\n' << iterations << '\n';
+		show_map.printMap(return_map(), height, width);
+	}
 	for (int i = 0; i < count; i++) {
 		makeIteration(*this);
 	}
-	if (silence == NO_SILENCE) {
-		show_map.printMap(return_map(), height, width);
-	}
 }
 
-std::vector<std::vector<char>> gf::GameField::return_map() {
+std::vector<std::vector<char>> GameField::return_map() {
 	std::vector<std::vector<char>> map_copy = field;
 	return map_copy;
 }
 
-void gf::GameField::dump(std::string output_file) {
-	std::ofstream fout;
-	fout.open(input_file);
+void GameField::dump(std::string output_file) {
+	std::ofstream fout(output_file,std::ios_base::out);
+	if (fout.is_open()) {//return mistake
+		std::cout << "fileisopen\n";
+	}
 	fout << FILE_FORMAT << '\n' << UNIVERSE_NAME_SPEC << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
 	for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
 		fout << (char)(*birth_num + CHAR_TO_NUM_COEF);
@@ -272,66 +272,67 @@ void gf::GameField::dump(std::string output_file) {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			if (field[i][j] == ALIVE_CELL) {
-				fout << i << " " << j << '\n';
+				fout << j << " " << i << '\n';
 			}
 		}
 	}
+	fout << height - 1 << ' ' << width - 1 << '\n';
 	fout.close();
 }
 
-void gf::GameField::run() {
+void GameField::run() {
 	if (mode == DEFAULT_MODE) {
 		iterate(iterations, SILENCE);
 		(*this).dump(output_file);
 	}
-	Console coutput;
+	cs::Console coutput;
 	std::string argument;
 	int returned_code = 0, ticks = 0, end_of_programm = 0;
 	for (;end_of_programm != END_OF_PROGRAMM;) {
 		returned_code = coutput.read_command(argument);
 		switch (returned_code) {
-			case DUMP:
+		case cs::DUMP:
 				if (argument.length() == 0) {
-					coutput.writeError(NO_FILENAME);
+					coutput.writeError(cs::NO_FILENAME);
 					break;
 				}
 				(*this).dump(argument);
 				coutput.writeMessage(SUCCESFUL_DUMP_MESSAGE);
 				break;
-			case HELP:
+		case cs::HELP:
 				coutput.writeMessage(HELP_MESSAGE);
 				break;
-			case EXIT:
+		case cs::EXIT:
 				coutput.writeMessage(EXIT_MESSAGE);
 				end_of_programm = END_OF_PROGRAMM;
 				break;
-			case TICK:
+		case cs::TICK:
 				if (argument.length() == 0) {
-					coutput.writeError(NO_TICKS);
+					coutput.writeError(cs::NO_TICKS);
 					break;
 				}
 				ticks = std::stoi(argument);
 				if (ticks <= 0) {
-					coutput.writeError(WRONG_TICKS);
+					coutput.writeError(cs::WRONG_TICKS);
 					break;
 				}
 				iterate(ticks);
 				break;
 			default:
-				coutput.writeError(WRONG_OPTION);
+				coutput.writeError(cs::WRONG_OPTION);
 		}
 	}
 }
 
-gf::ArgsContainer::ArgsContainer() {
+ArgsContainer::ArgsContainer() {
 
 }
 
-gf::ArgsContainer::~ArgsContainer() {
+ArgsContainer::~ArgsContainer() {
 
 }
 
-gf::ArgsContainer::ArgsContainer(int argc, char** argv) {
+ArgsContainer::ArgsContainer(int argc, char** argv) {
 	po::options_description desc("Allowed options:");
 	desc.add_options()
 		("help", "Writes help message")
@@ -363,8 +364,8 @@ gf::ArgsContainer::ArgsContainer(int argc, char** argv) {
 	buf_field.iterations = var_map["iterations"].as<int>();
 }
 
-void gf::ArgsContainer::gameFieldInitialization(gamefield::GameField& map) {
-	gamefield::GameField tmp(buf_field.input_file);
+void ArgsContainer::gameFieldInitialization(GameField& map) {
+	GameField tmp(buf_field.input_file);
 	map = tmp;
 	map.iterations = buf_field.iterations;
 	map.input_file = buf_field.input_file;
