@@ -33,7 +33,7 @@ gf::GameField::GameField(std::string input_filename) {
 		errout.writeError(cs::CANNOT_OPEN_FILE);
 		width = DEFAULT_WIDTH;
 		height = DEFAULT_HEIGHT;
-		field.resize(height, std::vector<char>(width, DEAD_CELL));	//not good, need own map
+		field.resize(height, std::vector<char>(width, DEAD_CELL));
 		survive_rule = DEFAULT_SURVIVE_RULE;
 		birth_rule = DEFAULT_BIRTH_RULE;
 		universe_name = DEFAULT_UNIVERSE_NAME;
@@ -278,11 +278,11 @@ void gf::GameField::dump(std::string output_file) {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			if (field[i][j] == ALIVE_CELL) {
-				fout << j << " " << i << '\n';
+				fout << i << " " << j << '\n';
 			}
 		}
 	}
-	fout << height - 1 << ' ' << width - 1 << '\n';
+	fout << height - 1 << ' ' << width - 1 << '\n';	//for loseless size
 	fout.close();
 }
 

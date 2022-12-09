@@ -23,24 +23,23 @@ namespace gamefield {
 		ASSERT_EQ(map.birth_rule, birth_ans);
 		ASSERT_EQ(map.survive_rule, survive_ans);
 		ASSERT_EQ(map.field[1][1], ALIVE_CELL);
-		ASSERT_EQ(map.field[1][49], ALIVE_CELL);
-		ASSERT_EQ(map.field[1065][74], ALIVE_CELL);
+		ASSERT_EQ(map.field[3][3], ALIVE_CELL);
+		ASSERT_EQ(map.field[74][1064], ALIVE_CELL);
 	}
 	TEST(TestSuite, poswidth) {
 		GameField map("tests/poswidth.txt");
-		ASSERT_EQ(map.width, 1235);
-		ASSERT_EQ(map.height, 22);
+		ASSERT_EQ(map.width, 22);
+		ASSERT_EQ(map.height, 1235);
 	}
 	
 	TEST(TestSuite, negwidth) {
 		GameField map("tests/negwidth.txt");
-		ASSERT_EQ(map.width, 124);
-		ASSERT_EQ(map.height, 13);
+		ASSERT_EQ(map.width, 13);
+		ASSERT_EQ(map.height, 124);
 	}
 
 	TEST(TestSuite, dump_file) {
 		GameField map("tests/dump_file_in.txt");
-		map.field[map.height - 1][map.width - 1] = ALIVE_CELL;
 		map.dump("tests/dump_file_out.txt");
 		GameField tmp("tests/dump_file_out.txt");
 		ASSERT_EQ(map.return_map(), tmp.return_map());
