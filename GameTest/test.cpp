@@ -38,3 +38,10 @@ TEST(TestSuite, toroidal) {
 	ASSERT_EQ(map.return_map(), tmp.return_map());
 }
 
+TEST(TestSuite, long_run) {
+	GameField map("tests/long_run.txt");
+	map.field[map.height - 1][map.width - 1] = DEAD_CELL;
+	GameField tmp = map;
+	map.iterate(84 * 100, SILENCE);
+	ASSERT_EQ(map.return_map(), tmp.return_map());
+}

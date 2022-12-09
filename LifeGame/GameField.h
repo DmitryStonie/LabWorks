@@ -56,6 +56,8 @@ class GameField {
 	FRIEND_TEST(TestSuite, toroidal);
 	FRIEND_TEST(TestSuite, update_cells);
 	FRIEND_TEST(TestSuite, dump_file);
+	FRIEND_TEST(TestSuite, long_run);
+	FRIEND_TEST(TestSuite, default_file);
 
 	std::vector<std::vector<char>> field;
 	std::string universe_name;

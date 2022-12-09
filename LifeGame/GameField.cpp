@@ -4,6 +4,7 @@
 
 namespace po = boost::program_options;
 namespace cs = console;
+
 GameField::GameField() {
 	width = DEFAULT_WIDTH;
 	height = DEFAULT_HEIGHT;
