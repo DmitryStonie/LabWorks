@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{f000674e-b8ca-47b9-a758-ea581eaa1235}</ProjectGuid>
+    <ProjectGuid>{e8be4066-2903-44da-8171-ce2836b8fac1}</ProjectGuid>
     <RootNamespace>SoundProcessor</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
