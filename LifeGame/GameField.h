@@ -9,47 +9,48 @@
 #include "../GameTest/pch.h"
 
 namespace po = boost::program_options;
-//default values
-const std::set<int> DEFAULT_SURVIVE_RULE{ 2, 3 };
-const std::set<int> DEFAULT_BIRTH_RULE{ 3 };
-const std::string DEFAULT_UNIVERSE_NAME = ("DefaultUniverseName");
-const int DEFAULT_WIDTH = 15;
-const int DEFAULT_HEIGHT = 15;
-//cells
-const int ALIVE_CELL = 1;
-const int DEAD_CELL = 0;
-
-//for file parser
-const int NON_CRITICAL_ERROR = 2;
-const int CRITICAL_ERROR = 3;
-const int NO_SURVIVE_RULE_ERROR = 4;
-const int RULES_ENTERED = 5;
-static const std::string FILE_FORMAT = "#Life 1.06";
-static const std::string UNIVERSE_NAME_SPEC = "#N ";
-static const std::string RULES_SPEC = "#R ";
-const char SLASH = '/';
-const char BIRTH_LETTER = 'B';
-const char SURVIVE_LETTER = 'S';
-
-const int SPEC_LENGTH = 3;
-const char CHAR_TO_NUM_COEF = 48;
-const int END_OF_PROGRAMM = 1;
-
-//commands messages
-const std::string SUCCESFUL_DUMP_MESSAGE = "Dump completed!\n";
-const std::string HELP_MESSAGE = "This is a help message\n";
-const std::string EXIT_MESSAGE = "End of the program...\n";
-
-//iterate mode
-const int SILENCE = 1;
-const int NO_SILENCE = 0;
-
-//gamemodes
-const int ONLINE_MODE = 1;
-const int DEFAULT_MODE = 2;
-const int OFFLINE_MODE = 3;
 
 namespace gamefield {
+	//default values
+	const std::set<int> DEFAULT_SURVIVE_RULE{ 2, 3 };
+	const std::set<int> DEFAULT_BIRTH_RULE{ 3 };
+	const std::string DEFAULT_UNIVERSE_NAME = ("DefaultUniverseName");
+	const int DEFAULT_WIDTH = 15;
+	const int DEFAULT_HEIGHT = 15;
+	//cells
+	const int ALIVE_CELL = 1;
+	const int DEAD_CELL = 0;
+	
+	//for file parser
+	const int NON_CRITICAL_ERROR = 2;
+	const int CRITICAL_ERROR = 3;
+	const int NO_SURVIVE_RULE_ERROR = 4;
+	const int RULES_ENTERED = 5;
+	static const std::string FILE_FORMAT = "#Life 1.06";
+	static const std::string UNIVERSE_NAME_SPEC = "#N ";
+	static const std::string RULES_SPEC = "#R ";
+	const char SLASH = '/';
+	const char BIRTH_LETTER = 'B';
+	const char SURVIVE_LETTER = 'S';
+	
+	const int SPEC_LENGTH = 3;
+	const char CHAR_TO_NUM_COEF = 48;
+	const int END_OF_PROGRAMM = 1;
+	
+	//commands messages
+	const std::string SUCCESFUL_DUMP_MESSAGE = "Dump completed!\n";
+	const std::string HELP_MESSAGE = "This is a help message\n";
+	const std::string EXIT_MESSAGE = "End of the program...\n";
+	
+	//iterate mode
+	const int SILENCE = 1;
+	const int NO_SILENCE = 0;
+	
+	//gamemodes
+	const int ONLINE_MODE = 1;
+	const int DEFAULT_MODE = 2;
+	const int OFFLINE_MODE = 3;
+	
 	class GameField {
 		friend class GameFieldTest;
 		FRIEND_TEST(TestSuite, poswidth);
