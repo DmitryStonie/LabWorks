@@ -2,6 +2,7 @@
 #include "Parser.h"
 
 int main()
+
 {
     std::string filename = "severe_tire_damage.wav";
     parser::Header header(filename);

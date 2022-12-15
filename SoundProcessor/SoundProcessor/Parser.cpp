@@ -1,91 +1,114 @@
 #include "Parser.h"
-#include <iostream>
-#include <cstdio>
-#include <string>
+#include <fstream>
 
-parser::Header::Header() {
+namespace ps = parser;
+
+ps::Header::Header() {
 	(*this).set_default_header();
 }
-
-parser::Header::Header(std::string filename) {
+ps::Header::Header(std::string filename) {
+	const int NOT_OPEN = 0;
+	const int BUF_SIZE = 1000;
 	(*this).set_default_header();
-	FILE* input_file = fopen( "severe_tire_damage.wav", "rb");
-	if (input_file == NULL) {
+	std::ifstream input_file("severe_tire_damage.wav");
+	if (!input_file.is_open()) {
 		std::cerr << "Unable to open file, error \n";
+		(*this).set_default_header();
 		return;
 	}
 	//default
-	char buf_char[HEADER_SIZE];
-	std::string buffer, buffer2;
-	int read_elem = 0;
-	read_elem = fread(buf_char, 1, HEADER_SIZE, input_file);
-	buffer = read_elem;
-	if (sizeof(buffer) != HEADER_SIZE) {
+	char buf_char[BUF_SIZE];
+	int subchunk2SizeIndex;
+	if (!input_file.read(buf_char, BUF_SIZE)) {
 		std::cerr << "Header is corrupted.\n";
 	}
 	else {
-		chunkId = buffer.substr(0, 4);
-		buffer2 = buffer.substr(4, 4);
-		chunkSize = stoi(buffer2);
-		format = buffer.substr(8, 4);
-		subchunk1Id = buffer.substr(12, 4);
-		buffer2 = buffer.substr(16, 4);
-		subchunk1Size = stoi(buffer2);
-		buffer2 = buffer.substr(20, 2);
-		audioFormat = stoi(buffer2);
-		buffer2 = buffer.substr(22, 2);
-		numChannels = stoi(buffer2);
-		buffer2 = buffer.substr(24, 4);
-		sampleRate = stoi(buffer2);
-		buffer2 = buffer.substr(28, 4);
-		byteRate = stoi(buffer2);
-		buffer2 = buffer.substr(32, 2);
-		blockAlign = stoi(buffer2);
-		buffer2 = buffer.substr(34, 2);
-		bitsPerSample = stoi(buffer2);
-		subchunk2Id = buffer.substr(36, 4);
-		buffer2 = buffer.substr(40, 4);
-		subchunk2Size = stoi(buffer2);
-		is_correct = (*this).iscorrect();
-		if (is_correct == INCORRECT) {
+		copy_str(chunkId, buf_char, 0, 4);
+		std::memcpy(&chunkSize, buf_char + 4, 4);
+		copy_str(format, buf_char, 8, 4);
+		copy_str(subchunk1Id, buf_char, 12, 4);
+		std::memcpy(&subchunk1Size, buf_char + 16, 4);
+		std::memcpy(&audioFormat, buf_char + 20, 2);
+		std::memcpy(&numChannels, buf_char + 22, 2);
+		std::memcpy(&sampleRate, buf_char + 24, 4);
+		std::memcpy(&byteRate, buf_char + 28, 4);
+		std::memcpy(&blockAlign, buf_char + 32, 2);
+		std::memcpy(&bitsPerSample, buf_char + 34, 2);
+		copy_str(subchunk2Id, buf_char, 36, 4);
+		subchunk2SizeIndex = this->readDataChunkId(buf_char, HEADER_SIZE, BUF_SIZE);
+		if (subchunk2SizeIndex == 0) {
 			std::cerr << "Header is not a WAV header. Can't use this file\n";
+			return;
+
+		}
+		copy_str(subchunk2Id, buf_char, subchunk2SizeIndex - 4, 4);
+		std::memcpy(&subchunk2Size, buf_char + subchunk2SizeIndex, 4);
+		is_correct = (*this).iscorrect();
+		if (is_correct == ps::INCORRECT) {
+			std::cerr << "Header is not a WAV header. Can't use this file\n";
+		}
+		else {
+			input_file.seekg(subchunk2SizeIndex+4);
+			input_file.read(buf_char, 4);
 		}
 	}
 }
 
-parser::Header::~Header() {
+ps::Header::~Header() {
 
 }
 
-void parser::Header::set_default_header() {
-	is_correct = CORRECT;
-	chunkId = RIFF_CHAIN;
-	chunkSize = HEADER_SIZE - 4;	//data part is empty	
-	format = WAVE_FORMAT;
-	subchunk1Id = FMT_SUBCHAIN;
-	subchunk1Size = PCM_SUBCHUNK_SIZE;	//for PCM
-	audioFormat = PCM_FORMAT;	//for PCM
-	numChannels = DEFAULT_CHANNELS;
-	sampleRate = DEFAULT_RATE;
-	bitsPerSample = DEFAULT_BITS_PER_SAMPLE;
+void ps::Header::set_default_header() {
+	is_correct = ps::CORRECT;
+	copy_str(chunkId, ps::RIFF_CHAIN, 0, 4);
+	chunkSize = ps::HEADER_SIZE - 4;	//data part is empty
+	copy_str(format, ps::WAVE_FORMAT, 8, 4);
+	copy_str(subchunk1Id, ps::FMT_SUBCHAIN, 12, 4);
+	subchunk1Size = ps::PCM_SUBCHUNK_SIZE;	//for PCM
+	audioFormat = ps::PCM_FORMAT;	//for PCM
+	numChannels = ps::DEFAULT_CHANNELS;
+	sampleRate = ps::DEFAULT_RATE;
+	bitsPerSample = ps::DEFAULT_BITS_PER_SAMPLE;
 	byteRate = sampleRate * numChannels * bitsPerSample / 8;	// 1 byte = 8 bits
 	blockAlign = numChannels * bitsPerSample / 8;
-	subchunk2Id = DATA_SUBCHAIN;
+	copy_str(subchunk2Id, ps::DATA_SUBCHAIN, 36, 4);
 	subchunk2Size = 0;	//data part is empty
 }
 
-const bool parser::Header::iscorrect() {
-	if (chunkId == RIFF_CHAIN && format == WAVE_FORMAT && subchunk1Id == FMT_SUBCHAIN
-		&& subchunk2Id == DATA_SUBCHAIN && sampleRate == DEFAULT_RATE
-		&& bitsPerSample == DEFAULT_BITS_PER_SAMPLE && numChannels == DEFAULT_CHANNELS
-		&& audioFormat == PCM_FORMAT && subchunk1Size == PCM_SUBCHUNK_SIZE) {
-		return CORRECT;
+const bool ps::Header::iscorrect() {
+	if (compare_id(chunkId, ps::RIFF_CHAIN) == ps::EQUAL && compare_id(format, ps::WAVE_FORMAT) == ps::EQUAL
+		&& compare_id(subchunk1Id, ps::FMT_SUBCHAIN) == ps::EQUAL && compare_id(subchunk2Id, ps::DATA_SUBCHAIN) == ps::EQUAL
+		&& sampleRate == ps::DEFAULT_RATE && bitsPerSample == ps::DEFAULT_BITS_PER_SAMPLE
+		&& numChannels == ps::DEFAULT_CHANNELS && audioFormat == ps::PCM_FORMAT && subchunk1Size == ps::PCM_SUBCHUNK_SIZE) {
+		return ps::CORRECT;
 	}
 	else {
-		return INCORRECT;
+		return ps::INCORRECT;
 	}
 }
 
-const bool parser::Header::return_correctness() {
+const bool ps::Header::return_correctness() {
 	return is_correct;
+}
+
+void ps::Header::copy_str( char* destination, const char* source, const int source_start, const int count) {
+	for (int i = 0; i < count; i++) {
+		destination[i] = source[i + source_start];
+	}
+}
+
+int ps::Header::compare_id(const  char* id1, const  char* id2) {
+	for (int i = 0; i < 4; i++) {
+		if (id1[i] != id2[i]) return ps::UNEQUAL;
+	}
+	return ps::EQUAL;
+}
+
+int ps::Header::readDataChunkId(char* array, int pos, int array_size) {
+	const int chunkNameSize = 4;
+	while (pos != array_size - 1) {
+		if (compare_id(array + pos, ps::DATA_SUBCHAIN) == EQUAL) return pos + chunkNameSize;
+		pos++;
+	}
+	return NO_DATA;
 }
