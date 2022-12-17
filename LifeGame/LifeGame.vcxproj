@@ -129,11 +129,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="ConsoleAction.cpp" />
     <ClCompile Include="GameField.cpp" />
     <ClCompile Include="LifeGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console.h" />
+    <ClInclude Include="ConsoleAction.h" />
     <ClInclude Include="GameField.h" />
   </ItemGroup>
   <ItemGroup>

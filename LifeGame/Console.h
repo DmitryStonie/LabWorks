@@ -6,11 +6,13 @@
 
 namespace console {
 	//command codes
-	const int WRONG_COMMAND = 1;
-	const int DUMP = 2;
-	const int TICK = 3;
-	const int EXIT = 4;
-	const int HELP = 5;
+	enum codes {
+		WRONG_COMMAND = 0,
+		DUMP = 1,
+		TICK = 2,
+		EXIT = 3,
+		HELP = 4
+	};
 	const int COMMAND_LENGTH = 5;
 	const int ALIVE_CELL = 1;
 	//error codes

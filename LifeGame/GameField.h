@@ -20,7 +20,7 @@ namespace gamefield {
 	//cells
 	const int ALIVE_CELL = 1;
 	const int DEAD_CELL = 0;
-	
+
 	//for file parser
 	const int NON_CRITICAL_ERROR = 2;
 	const int CRITICAL_ERROR = 3;
@@ -32,27 +32,29 @@ namespace gamefield {
 	const char SLASH = '/';
 	const char BIRTH_LETTER = 'B';
 	const char SURVIVE_LETTER = 'S';
-	
+
 	const int SPEC_LENGTH = 3;
 	const char CHAR_TO_NUM_COEF = 48;
 	const int END_OF_PROGRAMM = 1;
-	
+
 	//commands messages
 	const std::string SUCCESFUL_DUMP_MESSAGE = "Dump completed!\n";
-	const std::string HELP_MESSAGE = "This is a help message\n";
+	const std::string HELP_MESSAGE = "help for this help message\ndump <filename> for dump your field\nexit for exit from programm\ntick <number> for make number iterations\n";
 	const std::string EXIT_MESSAGE = "End of the program...\n";
-	
+
 	//iterate mode
 	const int SILENCE = 1;
 	const int NO_SILENCE = 0;
-	
+	const int NO_SILENCE = 0;
+
 	//gamemodes
 	const int ONLINE_MODE = 1;
 	const int DEFAULT_MODE = 2;
 	const int OFFLINE_MODE = 3;
-	
+
 	class GameField {
 		friend class GameFieldTest;
+		FRIEND_TEST(TestSuite, poswidth);
 		FRIEND_TEST(TestSuite, poswidth);
 		FRIEND_TEST(TestSuite, negwidth);
 		FRIEND_TEST(TestSuite, toroidal);

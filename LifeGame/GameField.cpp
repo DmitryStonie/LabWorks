@@ -1,10 +1,12 @@
 #include <fstream>
 #include "GameField.h"
 #include "Console.h"
+#include "ConsoleAction.h"
 
 namespace po = boost::program_options;
 namespace cs = console;
 namespace gf = gamefield;
+namespace ca = consoleaction;
 
 gf::GameField::GameField() {
 	width = DEFAULT_WIDTH;
@@ -262,7 +264,7 @@ void gf::GameField::dump(std::string output_file) {
 	cs::Console errout;
 	if (fout.is_open() == 0) {
 		errout.writeError(cs::CANNOT_OPEN_FILE);
-		errout.writeMessage("Name of file:"+output_file);
+		errout.writeMessage("Name of file: "+output_file + "\n");
 		fout.close();
 		return;
 	}
@@ -282,6 +284,7 @@ void gf::GameField::dump(std::string output_file) {
 			}
 		}
 	}
+	errout.writeMessage(gf::SUCCESFUL_DUMP_MESSAGE);
 	fout << height - 1 << ' ' << width - 1 << '\n';	//for loseless size
 	fout.close();
 }
@@ -293,40 +296,12 @@ void gf::GameField::run() {
 	}
 	cs::Console coutput;
 	std::string argument;
-	int returned_code = 0, ticks = 0, end_of_programm = 0;
+	ca::ConsoleAction init_act;
+	std::vector<ca::ConsoleAction*> actions = init_act.initialize_array();
+	int returned_code = 0, end_of_programm = 0;
 	for (;end_of_programm != END_OF_PROGRAMM;) {
 		returned_code = coutput.read_command(argument);
-		switch (returned_code) {
-		case cs::DUMP:
-				if (argument.length() == 0) {
-					coutput.writeError(cs::NO_FILENAME);
-					break;
-				}
-				(*this).dump(argument);
-				coutput.writeMessage(SUCCESFUL_DUMP_MESSAGE);
-				break;
-		case cs::HELP:
-				coutput.writeMessage(HELP_MESSAGE);
-				break;
-		case cs::EXIT:
-				coutput.writeMessage(EXIT_MESSAGE);
-				end_of_programm = END_OF_PROGRAMM;
-				break;
-		case cs::TICK:
-				if (argument.length() == 0) {
-					coutput.writeError(cs::NO_TICKS);
-					break;
-				}
-				ticks = std::stoi(argument);
-				if (ticks <= 0) {
-					coutput.writeError(cs::WRONG_TICKS);
-					break;
-				}
-				iterate(ticks);
-				break;
-			default:
-				coutput.writeError(cs::WRONG_OPTION);
-		}
+		actions[returned_code]->doAction(*this, coutput, end_of_programm, argument);
 	}
 }
 
