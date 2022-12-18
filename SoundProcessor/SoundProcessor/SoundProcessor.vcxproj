@@ -127,17 +127,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ArgsContainer.cpp" />
+    <ClCompile Include="Configparser.cpp" />
+    <ClCompile Include="Converters.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="SoundProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Configparser.h" />
+    <ClInclude Include="Converters.h" />
+    <ClInclude Include="ArgsContainer.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Input.h" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="defconfig.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\boost.1.81.0\build\boost.targets" Condition="Exists('..\packages\boost.1.81.0\build\boost.targets')" />
+    <Import Project="..\packages\boost_program_options-vc143.1.81.0\build\boost_program_options-vc143.targets" Condition="Exists('..\packages\boost_program_options-vc143.1.81.0\build\boost_program_options-vc143.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\boost.1.81.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.81.0\build\boost.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_program_options-vc143.1.81.0\build\boost_program_options-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_program_options-vc143.1.81.0\build\boost_program_options-vc143.targets'))" />
+  </Target>
 </Project>

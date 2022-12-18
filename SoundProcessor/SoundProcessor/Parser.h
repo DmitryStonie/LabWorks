@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace parser {
 	const int HEADER_SIZE = 40;
@@ -44,5 +45,14 @@ namespace parser {
 		void copy_str(char* destination, const char* source, const int source_start, const int count);
 		int compare_id(const char* id1, const char* id2);
 		int readDataChunkId(char* array, int pos, int array_size);
+	};
+	const int BUF_SIZE = 4096;
+	class data {
+		std::vector<unsigned short> samples;
+		int last_index;
+	public:
+		data();
+		~data();
+		int readSampleArray(std::ifstream& input);
 	};
 }

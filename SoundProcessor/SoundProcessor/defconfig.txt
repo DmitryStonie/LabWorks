@@ -1,0 +1,3 @@
+mute 0 5
+mix $2 10
+lower 5 10
