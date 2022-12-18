@@ -20,6 +20,7 @@ namespace parser {
 	const bool UNEQUAL = 1;
 	const bool NO_DATA = 0;
 	const bool DATA = 1;
+	const int DEFAULT_SIZE = 4096;
 	class Header {
 		bool is_correct;
 		char chunkId[4];				//for "RIFF" symbols
@@ -47,12 +48,13 @@ namespace parser {
 		int readDataChunkId(char* array, int pos, int array_size);
 	};
 	const int BUF_SIZE = 4096;
+	const int ERROR = 123;
 	class data {
 		std::vector<unsigned short> samples;
 		int last_index;
 	public:
 		data();
 		~data();
-		int readSampleArray(std::ifstream& input);
+		int readSampleArray(std::ifstream& input, int arraySize = DEFAULT_SIZE);
 	};
 }

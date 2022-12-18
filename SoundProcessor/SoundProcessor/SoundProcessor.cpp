@@ -4,14 +4,20 @@
 #include "ArgsContainer.h"
 #include "Converters.h"
 
+namespace ps = parser;
+namespace cp = configparser;
+namespace ac = argscontainer;
+namespace cv = converter;
+
 int main(int argc, char ** argv)
 {
-    std::string filename = "severe_tire_damage.wav";
-    parser::Header header(filename);
-    if (header.return_correctness() == parser::INCORRECT) {
-        std::cerr << "Cannot use file " << filename << "\n";
-    }
-    
+    ac::ArgsContainer argcont(argc, argv);
+    std::vector<std::string> arguments;
+    arguments = argcont.returnArguments();
+    cp::ConfigParser Configuration;
 
+
+
+    return 0;
 }
 

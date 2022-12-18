@@ -112,3 +112,19 @@ int ps::Header::readDataChunkId(char* array, int pos, int array_size) {
 	}
 	return NO_DATA;
 }
+
+ps::data::data() {
+
+}
+
+ps::data::~data() {
+
+}
+
+int ps::data::readSampleArray(std::ifstream& input, int arraySize) {
+	char buf[BUF_SIZE * 2];
+	if (!(input.read(buf, BUF_SIZE * 2))) {
+		return ERROR;
+	}
+	std::memcpy(&samples, buf, BUF_SIZE*2);
+}
