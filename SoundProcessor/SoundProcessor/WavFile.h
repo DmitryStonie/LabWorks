@@ -26,7 +26,14 @@ namespace wavfile {
 	const bool NOT_SUCCESFUL = 1;
 	const int ERROR = 123;
 	const int DEFAULT_LAST_INDEX = 0;
-	class Header {
+	const bool OPENED = 0;
+	const bool CLOSED = 1;
+	enum exceptions {
+		CANNOT_OPEN_FILE = 0,
+		UNSUPPORTED_HEADER = 1
+	};
+	class WavFile {
+		//header
 		bool is_correct;
 		char chunkId[4];				//for "RIFF" symbols
 		unsigned long chunkSize;			//filesize - 8
@@ -41,37 +48,30 @@ namespace wavfile {
 		unsigned short bitsPerSample;		//sound depth
 		char subchunk2Id[4];			//for "data symbols"
 		unsigned long subchunk2Size;		//bites in data section
-		const bool iscorrect();
-		const bool return_correctness();
-		void copy_str(char* destination, const char* source, const int source_start, const int count);
-		int compare_id(const char* id1, const char* id2);
+		//data
+		std::vector<unsigned short> samples;
+		int last_index;
+		int open_status;
+
+		const bool isHeaderCorrect();
+		const bool returnHeaderCorrectness();
+		void copyStr(char* destination, const char* source, const int source_start, const int count);
+		int compareId(const char* id1, const char* id2);
 		int readDataChunkId(char* array, int pos, int array_size);
 		const char* num_str(unsigned long number);
 		const char* num_str(unsigned short number);
 	public:
-		Header();
-		Header(std::ifstream &inputStream);
-		virtual ~Header();
-		bool readHeader(std::ifstream &inputStream);
-		void set_default_header();
-		void changeSize(unsigned long filesize);
-		void writeHeader(std::ofstream output);
-	};
-
-	class data {
-		std::vector<unsigned short> samples;
-		int last_index;
-	public:
-		data();
-		virtual ~data();
-		int readSampleArray(std::ifstream& inputstream);
-		void writeData(std::ofstream output);
-	};
-
-	class WavFile : Header, data {
-	public:
 		WavFile();
-		WavFile(std::fstream filestream);
 		~WavFile();
+		void initialize(std::string filename);
+		void setDefaultHeader();
+		void changeSize(unsigned long filesize);
+		int isOpen();
+		
+		bool readHeader(std::fstream& input);
+		void writeHeader(std::fstream& output);
+		bool readData(std::fstream& input);
+		void writeData(std::fstream& output);
 	};
+
 }

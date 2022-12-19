@@ -7,29 +7,47 @@ namespace converter {
 	const std::string MIX_STR = "mix";
 	const std::string MUTE_STR = "mute";
 	const std::string LOWER_STR = "lower";
+	const int END_OF_FILE = -1;
+	const int NO_SECOND_STREAM = -1;
+	const int NOT_OPENED = 1;
+	const int ZERO = 0;
 	enum conv_codes {
 		MIX_CONVERTER = 0,
 		MUTE_CONVERTER = 1,
 		LOWER_CONVERTER = 2,
 		NOT_CONVERTER = 3
 	};
-
 	class Converter {
+	protected:
+		int interval_start;
+		int interval_end;
+		int secondStreamNumber;
 	public:
-		virtual void convert(std::vector<unsigned short>& input, std::vector<unsigned short>& output);
+		virtual void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
+		virtual void initialize(std::vector<std::string> parameters);
+		virtual int secondInputArg();
 		virtual ~Converter() {}
 	};
 
 	class Mix : public Converter {
-		void convert(std::vector<unsigned short>& input, std::vector<unsigned short>& output);
+	public:
+		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
+		void initialize(std::vector<std::string> parameters);
+		int secondInputArg();
 	};
 
 	class Mute : public Converter {
-		void convert(std::vector<unsigned short>& input, std::vector<unsigned short>& output);
+	public:
+		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
+		void initialize(std::vector<std::string> parameters);
+		int secondInputArg();
 	};
 
 	class Lower : public Converter {
-		void convert(std::vector<unsigned short>& input, std::vector<unsigned short>& output);
+	public:
+		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
+		void initialize(std::vector<std::string> parameters);
+		int secondInputArg();
 	};
 
 	class ConverterFactory {
@@ -48,22 +66,24 @@ namespace converter {
 	};
 
 	class LowerFactory : public ConverterFactory {
-		Converter* factoryMethod();
+		Converter* factoryMethod();	
 	};
+
 	class SoundProcessor {
 		std::vector<Converter*> converters;
-		std::vector<std::vector<int>> convertings;
-		std::vector<unsigned short> sampleStream;
 		std::vector<wavfile::WavFile*> files;
+		std::vector<unsigned short> input;
+		std::vector<unsigned short> input2;
+		std::vector<unsigned short> output;
 		int convFind(std::string convToFind, std::vector<std::string>& converterNames);
 		std::vector<int> read_arguments(std::vector<std::string> source, int converterCode);
-		void open_files(std::vector<std::string> files);
-		void init_conertings();
-		void init_converters();
+		void init_files(std::vector<std::string> filenames);
+		void init_converters(std::vector<std::vector<std::string>> config);
 	public:
 		SoundProcessor();
-		SoundProcessor(std::vector<std::vector<std::string>> configFile);
 		~SoundProcessor();
-		void run();
+		void initialize(std::vector<std::vector<std::string>> config, std::vector<std::string> filenames);
+		void run(std::vector<std::string> fileNames);
+
 	};
 }
