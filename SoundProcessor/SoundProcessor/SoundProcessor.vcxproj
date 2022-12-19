@@ -130,17 +130,18 @@
     <ClCompile Include="ArgsContainer.cpp" />
     <ClCompile Include="Configparser.cpp" />
     <ClCompile Include="Converters.cpp" />
-    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="SoundProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Configparser.h" />
     <ClInclude Include="Converters.h" />
     <ClInclude Include="ArgsContainer.h" />
-    <ClInclude Include="Parser.h" />
-    <ClInclude Include="Input.h" />
+    <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <ItemGroup>
+    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput.wav" />
+    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput2.wav" />
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav" />
   </ItemGroup>
   <ItemGroup>

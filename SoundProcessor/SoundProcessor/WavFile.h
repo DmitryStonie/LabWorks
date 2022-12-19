@@ -3,8 +3,9 @@
 #include <string>
 #include <vector>
 
-namespace parser {
+namespace wavfile {
 	const int HEADER_SIZE = 40;
+	const int DEFAULT_HEADER_SIZE = 44;
 	const int DEFAULT_RATE = 44100;
 	const int DEFAULT_CHANNELS = 1;
 	const int DEFAULT_BITS_PER_SAMPLE = 16;
@@ -20,7 +21,11 @@ namespace parser {
 	const bool UNEQUAL = 1;
 	const bool NO_DATA = 0;
 	const bool DATA = 1;
-	const int DEFAULT_SIZE = 4096;
+	const int DEFAULT_BUF_SIZE = 4096;
+	const bool SUCCESFUL = 0;
+	const bool NOT_SUCCESFUL = 1;
+	const int ERROR = 123;
+	const int DEFAULT_LAST_INDEX = 0;
 	class Header {
 		bool is_correct;
 		char chunkId[4];				//for "RIFF" symbols
@@ -36,25 +41,37 @@ namespace parser {
 		unsigned short bitsPerSample;		//sound depth
 		char subchunk2Id[4];			//for "data symbols"
 		unsigned long subchunk2Size;		//bites in data section
-	public:
-		Header();
-		Header(std::string filename);
-		~Header();
-		void set_default_header();
 		const bool iscorrect();
 		const bool return_correctness();
 		void copy_str(char* destination, const char* source, const int source_start, const int count);
 		int compare_id(const char* id1, const char* id2);
 		int readDataChunkId(char* array, int pos, int array_size);
+		const char* num_str(unsigned long number);
+		const char* num_str(unsigned short number);
+	public:
+		Header();
+		Header(std::ifstream &inputStream);
+		virtual ~Header();
+		bool readHeader(std::ifstream &inputStream);
+		void set_default_header();
+		void changeSize(unsigned long filesize);
+		void writeHeader(std::ofstream output);
 	};
-	const int BUF_SIZE = 4096;
-	const int ERROR = 123;
+
 	class data {
 		std::vector<unsigned short> samples;
 		int last_index;
 	public:
 		data();
-		~data();
-		int readSampleArray(std::ifstream& input, int arraySize = DEFAULT_SIZE);
+		virtual ~data();
+		int readSampleArray(std::ifstream& inputstream);
+		void writeData(std::ofstream output);
+	};
+
+	class WavFile : Header, data {
+	public:
+		WavFile();
+		WavFile(std::fstream filestream);
+		~WavFile();
 	};
 }

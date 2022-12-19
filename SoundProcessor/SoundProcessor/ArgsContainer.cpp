@@ -35,16 +35,6 @@ ac::ArgsContainer::ArgsContainer(int argc, char** argv) {
 		if (var_map.count("-h")) {
 			std::cout << Allowed << '\n';
 		}
-		if (var_map.count("outputFile")) {
-			std::cout << "Input files are: " << var_map["outputFile"].as< std::string> () << "\n";
-		}
-		if (var_map.count("inputFile")) {
-			std::cout << "Input files are: ";
-			inputFiles = var_map["inputFile"].as< std::vector<std::string>>();
-			for (int i = 0; i < inputFiles.size(); i++) {
-				std::cout << inputFiles[i] << "\n";
-			}
-		}
 	}
 	catch (const po::error& e) {
 		std::cout << "Error. Invalid command line arguments\n";
@@ -63,4 +53,5 @@ void ac::ArgsContainer::setDefaultArgs() {
 	outputFile = DEFAULT_OUTPUT;
 	inputFiles.resize(0);
 	inputFiles.push_back(DEFAULT_INPUT);
+	inputFiles.push_back(DEFAULT_INPUT2);
 }

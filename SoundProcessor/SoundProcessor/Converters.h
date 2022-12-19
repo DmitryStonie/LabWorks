@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "WavFile.h"
 
 namespace converter {
 	const std::string MIX_STR = "mix";
@@ -53,8 +54,12 @@ namespace converter {
 		std::vector<Converter*> converters;
 		std::vector<std::vector<int>> convertings;
 		std::vector<unsigned short> sampleStream;
+		std::vector<wavfile::WavFile*> files;
 		int convFind(std::string convToFind, std::vector<std::string>& converterNames);
 		std::vector<int> read_arguments(std::vector<std::string> source, int converterCode);
+		void open_files(std::vector<std::string> files);
+		void init_conertings();
+		void init_converters();
 	public:
 		SoundProcessor();
 		SoundProcessor(std::vector<std::vector<std::string>> configFile);

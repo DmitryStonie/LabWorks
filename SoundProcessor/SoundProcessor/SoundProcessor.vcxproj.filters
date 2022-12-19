@@ -18,7 +18,7 @@
     <ClCompile Include="SoundProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Parser.cpp">
+    <ClCompile Include="WavFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Configparser.cpp">
@@ -32,10 +32,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Parser.h">
+    <ClInclude Include="WavFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Configparser.h">
@@ -50,6 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput2.wav">
       <Filter>Resource Files</Filter>
     </Media>
   </ItemGroup>

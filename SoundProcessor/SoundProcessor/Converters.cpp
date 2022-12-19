@@ -22,6 +22,13 @@ void cv::Lower::convert(std::vector<unsigned short> &input, std::vector<unsigned
 		output[i] = (output[i] + HIGHER) % USHRT_MAX;
 	}
 }
+void cv::Converter::convert(std::vector<unsigned short>& input, std::vector<unsigned short>& output) {
+	return;
+}
+
+cv::Converter* cv::ConverterFactory::factoryMethod() {
+	return new cv::Converter();
+}
 
 cv::Converter* cv::MuteFactory::factoryMethod() {
 	return new cv::Mute();
@@ -59,7 +66,7 @@ cv::SoundProcessor::SoundProcessor(std::vector<std::vector<std::string>> configF
 	
 	for (int i = 0; i < configFile.size(); i++) {
 		item = configFile[i][0];
-		item_index = convFind(item);
+		//item_index = convFind(item);
 		if (item_index != cv::NOT_CONVERTER) {
 			converters.push_back(factories[item_index]->factoryMethod());
 			convertings.push_back(read_arguments(configFile[i], item_index));
@@ -79,12 +86,16 @@ std::vector<int> cv::SoundProcessor::read_arguments(std::vector<std::string> sou
 	std::vector<int> arguments;
 	arguments.push_back(converterCode);
 	std::string item;
-	int 
+	//int 
 	for (int i = 1; i < source.size(); i++) {
 		item = source[i];
 		if (item[0] == '$') {
 
 		}
 	}
+	return arguments;
 }
 
+void cv::SoundProcessor::run() {
+
+}
