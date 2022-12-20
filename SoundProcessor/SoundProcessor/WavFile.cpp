@@ -12,7 +12,7 @@ wf::WavFile::~WavFile() {
 }
 
 void wf::WavFile::initialize(std::string filename) {
-	fileStream.open(filename);
+	fileStream.open(filename, std::ios_base::in | std::ios_base::binary);
 	if (!(fileStream.is_open())) {
 		setDefaultHeader();
 		open_status = CLOSED;
@@ -62,7 +62,7 @@ bool wf::WavFile::readHeader() {
 	const int BUF_SIZE = 1000;
 	char buf_char[BUF_SIZE];
 	int subchunk2SizeIndex;
-	if (fileStream.read(buf_char, BUF_SIZE)) {
+	if (!(fileStream.read(buf_char, BUF_SIZE))) {
 		std::cerr << "Header is corrupted.\n";
 		return NOT_SUCCESFUL;
 	}
@@ -122,14 +122,21 @@ int wf::WavFile::readData(std::vector<unsigned short> data, int readIndex) {
 	if (open_status == CLOSED) return ZERO;
 	int bufSize = data.size() * 2;
 	std::vector<char> buf(bufSize);
+	static unsigned short* buf_short[DEFAULT_BUF_SIZE];
 	int charToRead;
-	if (readIndex + bufSize >= fileSize) open_status = CLOSED;
-	charToRead = (fileSize - readIndex) % bufSize;
+	if (readIndex + bufSize >= fileSize) {
+		open_status = CLOSED;
+		charToRead = (fileSize - readIndex) % bufSize;
+	}
+	else {
+		charToRead = bufSize;
+	}
 	readIndex = readIndex + firstDataIndex;
 	fileStream.seekg(readIndex);
 	fileStream.read(buf.data(), charToRead);
-	std::memcpy(&data, buf.data(), DEFAULT_BUF_SIZE * 2);
-	return SUCCESFUL;
+	std::memcpy(buf_short, buf.data(), charToRead);
+	data.insert(data.end(), buf_short, buf_short + bufSize);
+	return charToRead;
 }
 
 void wf::WavFile::writeData(std::vector<unsigned short> data, int writeIndex) {
@@ -196,4 +203,12 @@ const char* wf::WavFile::num_str(unsigned short number) {
 
 unsigned long wf::WavFile::returnDataPos() {
 	return fileSize - subchunk2Size;
+}
+
+void wf::WavFile::outInitialize(std::string filename) {
+	fileStream.open(filename, std::ios_base::out | std::ios_base::binary);
+	if (!(fileStream.is_open())) {
+		throw CANNOT_OPEN_FILE;
+	}
+	setDefaultHeader();
 }

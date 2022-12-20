@@ -41,6 +41,7 @@ void cv::Mute::convert(std::vector<unsigned short>& input1, std::vector<unsigned
 }
 
 void cv::Mute::initialize(std::vector<std::string> parameters) {
+	if (parameters.size() < 3) throw 1;
 	interval_start = atoi(parameters[1].data());
 	interval_end = atoi(parameters[2].data());
 }
@@ -117,6 +118,9 @@ cv::SoundProcessor::~SoundProcessor() {
 void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>> config, std::vector<std::string> filenames) {
 	init_converters(config);
 	init_files(filenames);
+	input1.resize(wf::DEFAULT_BUF_SIZE);
+	input2.resize(wf::DEFAULT_BUF_SIZE);
+	output.resize(wf::DEFAULT_BUF_SIZE);
 }
 
 int cv::SoundProcessor::convFind(std::string convToFind, std::vector<std::string> &converterNames) {
@@ -127,15 +131,17 @@ int cv::SoundProcessor::convFind(std::string convToFind, std::vector<std::string
 }
 
 void cv::SoundProcessor::init_files(std::vector<std::string> filenames) {
-	for (int i = 0; i < filenames.size() - 1; i++) {
-		files[i] = new wavfile::WavFile;
+	for (int i = 0; i < filenames.size() - 2; i++) {
+		files.push_back(new wavfile::WavFile);
 		files[i]->initialize(filenames[i]);
 		if (files[i]->isOpen() == NOT_OPENED) {
 			delete files[i];
 			files[i] == NULL;
 		}
 	}
-	files[files.size() - 1]->setDefaultHeader();
+	files.push_back(new wavfile::WavFile);
+	files[filenames.size() - 2]->outInitialize(filenames[filenames.size() - 2]);
+	files[files.size() - 2]->setDefaultHeader();
 }
 
 void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> config) {
@@ -155,7 +161,7 @@ void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> c
 }
 
 void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
-	unsigned long readPos = files[0]->returnDataPos();
+	unsigned long readPos = 0;
 	unsigned long writePos = wf::DEFAULT_HEADER_SIZE;
 	unsigned long riddenBytes;
 	files[files.size() - 2]->writeHeader();

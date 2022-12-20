@@ -140,8 +140,8 @@
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput.wav" />
-    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput2.wav" />
+    <Media Include="definput.wav" />
+    <Media Include="definput2.wav" />
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav" />
   </ItemGroup>
   <ItemGroup>

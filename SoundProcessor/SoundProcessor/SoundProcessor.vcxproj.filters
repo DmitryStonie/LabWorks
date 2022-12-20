@@ -49,10 +49,10 @@
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav">
       <Filter>Resource Files</Filter>
     </Media>
-    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput.wav">
+    <Media Include="definput.wav">
       <Filter>Resource Files</Filter>
     </Media>
-    <Media Include="..\..\..\..\..\..\Downloads\ffmpeg-master-latest-win64-gpl\ffmpeg-master-latest-win64-gpl\bin\definput2.wav">
+    <Media Include="definput2.wav">
       <Filter>Resource Files</Filter>
     </Media>
   </ItemGroup>

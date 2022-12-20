@@ -71,6 +71,7 @@ namespace wavfile {
 		void setDefaultHeader();
 		void changeSize(unsigned long filesize);
 		int isOpen();
+		void outInitialize(std::string filename);
 		unsigned long returnDataPos();
 		
 		bool readHeader();

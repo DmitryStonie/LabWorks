@@ -4,7 +4,7 @@
 namespace po = boost::program_options;
 
 namespace argscontainer {
-	const std::string DEFAULT_CONFIG = "defconf.txt";
+	const std::string DEFAULT_CONFIG = "defconfig.txt";
 	const std::string DEFAULT_INPUT = "definput.wav";
 	const std::string DEFAULT_INPUT2 = "definput2.wav";
 	const std::string DEFAULT_OUTPUT = "defoutput.wav";
