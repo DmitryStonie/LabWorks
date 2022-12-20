@@ -8,18 +8,19 @@ wf::WavFile::WavFile() {
 }
 
 wf::WavFile::~WavFile() {
-
+	fileStream.close();
 }
 
 void wf::WavFile::initialize(std::string filename) {
-	std::fstream filestream(filename);
-	if (!(filestream.is_open())) {
+	fileStream.open(filename);
+	if (!(fileStream.is_open())) {
 		setDefaultHeader();
 		open_status = CLOSED;
 		throw CANNOT_OPEN_FILE;
 	}
-	bool header_status = readHeader(filestream);
+	bool header_status = readHeader();
 	if(header_status == NOT_SUCCESFUL) {
+		open_status = CLOSED;
 		throw UNSUPPORTED_HEADER;
 		setDefaultHeader();
 	}
@@ -41,6 +42,8 @@ void wf::WavFile::setDefaultHeader() {
 	blockAlign = numChannels * bitsPerSample / 8;
 	copyStr(subchunk2Id, wf::DATA_SUBCHAIN, 36, 4);
 	subchunk2Size = 0;	//data part is empty
+	fileSize = DEFAULT_HEADER_SIZE;
+	firstDataIndex = fileSize - subchunk2Size;
 }
 
 int wf::WavFile::isOpen() {
@@ -51,14 +54,15 @@ void wf::WavFile::changeSize(unsigned long filesize) {
 	chunkSize = filesize - 8;
 	subchunk1Size = PCM_SUBCHUNK_SIZE;
 	subchunk2Size = filesize - DEFAULT_HEADER_SIZE;
+	fileSize = filesize;
 }
 
-bool wf::WavFile::readHeader(std::fstream& input) {
+bool wf::WavFile::readHeader() {
 	const int NOT_OPEN = 0;
 	const int BUF_SIZE = 1000;
 	char buf_char[BUF_SIZE];
 	int subchunk2SizeIndex;
-	if (input.read(buf_char, BUF_SIZE)) {
+	if (fileStream.read(buf_char, BUF_SIZE)) {
 		std::cerr << "Header is corrupted.\n";
 		return NOT_SUCCESFUL;
 	}
@@ -82,20 +86,18 @@ bool wf::WavFile::readHeader(std::fstream& input) {
 		}
 		copyStr(subchunk2Id, buf_char, subchunk2SizeIndex - 4, 4);
 		std::memcpy(&subchunk2Size, buf_char + subchunk2SizeIndex, 4);
+		fileSize = chunkSize + 8;
+		firstDataIndex = fileSize - subchunk2Size;
 		is_correct = (*this).isHeaderCorrect();
 		if (is_correct == wf::INCORRECT) {
 			std::cerr << "Header is not a WAV header. Can't use this file\n";
 			return NOT_SUCCESFUL;
 		}
-		else {
-			input.seekg(subchunk2SizeIndex + 4);
-			input.read(buf_char, 4);
-		}
 	}
 	return SUCCESFUL;
 }
 
-void wf::WavFile::writeHeader(std::fstream& output) {
+void wf::WavFile::writeHeader() {
 	char out[DEFAULT_HEADER_SIZE];
 	strcat(out, chunkId);
 	strcat(out, num_str(chunkSize));
@@ -110,22 +112,34 @@ void wf::WavFile::writeHeader(std::fstream& output) {
 	strcat(out, num_str(bitsPerSample));
 	strcat(out, subchunk2Id);
 	strcat(out, num_str(subchunk2Size));
-	output.write(out, DEFAULT_HEADER_SIZE);
+	fileStream.write(out, DEFAULT_HEADER_SIZE);
+	fileSize += DEFAULT_HEADER_SIZE;
+	firstDataIndex = DEFAULT_HEADER_SIZE;
+
 }
 
-bool wf::WavFile::readData(std::fstream& input) {
-	static char buf[DEFAULT_BUF_SIZE * 2];
-	input.read(buf, DEFAULT_BUF_SIZE * 2);
-	std::memcpy(&samples, buf, DEFAULT_BUF_SIZE * 2);
+int wf::WavFile::readData(std::vector<unsigned short> data, int readIndex) {
+	if (open_status == CLOSED) return ZERO;
+	int bufSize = data.size() * 2;
+	std::vector<char> buf(bufSize);
+	int charToRead;
+	if (readIndex + bufSize >= fileSize) open_status = CLOSED;
+	charToRead = (fileSize - readIndex) % bufSize;
+	readIndex = readIndex + firstDataIndex;
+	fileStream.seekg(readIndex);
+	fileStream.read(buf.data(), charToRead);
+	std::memcpy(&data, buf.data(), DEFAULT_BUF_SIZE * 2);
 	return SUCCESFUL;
 }
 
-void wf::WavFile::writeData(std::fstream& output) {
-	static char buf[DEFAULT_BUF_SIZE * 2];
+void wf::WavFile::writeData(std::vector<unsigned short> data, int writeIndex) {
+	int bufSize = data.size() * 2;
+	std::vector<char> buf(bufSize);
 	for (int i = 0; i < DEFAULT_BUF_SIZE; i++) {
-		sprintf(buf + i * 2, "%hu", samples[i]);
+		sprintf(buf.data() + i * 2, "%hu", data[i]);
 	}
-	output.write(buf, DEFAULT_BUF_SIZE * 2);
+	fileStream.seekg(writeIndex);
+	fileStream.write(buf.data(), DEFAULT_BUF_SIZE * 2);
 };
 
 const bool wf::WavFile::isHeaderCorrect() {
@@ -180,3 +194,6 @@ const char* wf::WavFile::num_str(unsigned short number) {
 	return tmp_str.data();
 }
 
+unsigned long wf::WavFile::returnDataPos() {
+	return fileSize - subchunk2Size;
+}

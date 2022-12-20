@@ -135,6 +135,7 @@ void cv::SoundProcessor::init_files(std::vector<std::string> filenames) {
 			files[i] == NULL;
 		}
 	}
+	files[files.size() - 1]->setDefaultHeader();
 }
 
 void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> config) {
@@ -154,8 +155,24 @@ void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> c
 }
 
 void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
-	wf::WavFile outputFile;
-	outputFile.initialize(fileNames[files.size() - 2]);
-	outputFile.writeHeader();
+	unsigned long readPos = files[0]->returnDataPos();
+	unsigned long writePos = wf::DEFAULT_HEADER_SIZE;
+	unsigned long riddenBytes;
+	files[files.size() - 2]->writeHeader();
+	int secondFileIndex;
+	for (;;) {
+		riddenBytes = files[0]->readData(input1, readPos);
+		if (riddenBytes == 0) return;
+		for (int j = 0; j < converters.size(); j++) {
+			secondFileIndex = converters[j]->secondInputArg();
+			if (secondFileIndex != NO_SECOND_STREAM) {
+				files[secondFileIndex]->readData(input2, readPos);
+			}
+			converters[j]->convert(input1, input2, output, readPos, readPos + input1.size());
+			input1.swap(output);
+		}
+		files[files.size() - 2]->writeData(input1, writePos);
+		writePos += riddenBytes;
+	}
 
 }

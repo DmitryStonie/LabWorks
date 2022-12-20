@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 namespace wavfile {
 	const int HEADER_SIZE = 40;
@@ -28,6 +29,7 @@ namespace wavfile {
 	const int DEFAULT_LAST_INDEX = 0;
 	const bool OPENED = 0;
 	const bool CLOSED = 1;
+	const int ZERO = 0;
 	enum exceptions {
 		CANNOT_OPEN_FILE = 0,
 		UNSUPPORTED_HEADER = 1
@@ -49,9 +51,11 @@ namespace wavfile {
 		char subchunk2Id[4];			//for "data symbols"
 		unsigned long subchunk2Size;		//bites in data section
 		//data
-		std::vector<unsigned short> samples;
 		int last_index;
 		int open_status;
+		int firstDataIndex;
+		unsigned long fileSize;
+		std::fstream fileStream;
 
 		const bool isHeaderCorrect();
 		const bool returnHeaderCorrectness();
@@ -67,11 +71,12 @@ namespace wavfile {
 		void setDefaultHeader();
 		void changeSize(unsigned long filesize);
 		int isOpen();
+		unsigned long returnDataPos();
 		
-		bool readHeader(std::fstream& input);
-		void writeHeader(std::fstream& output);
-		bool readData(std::fstream& input);
-		void writeData(std::fstream& output);
+		bool readHeader();
+		void writeHeader();
+		int readData(std::vector<unsigned short> data, int readIndex);
+		void writeData(std::vector<unsigned short> data, int writeIndex);
 	};
 
 }

@@ -72,11 +72,10 @@ namespace converter {
 	class SoundProcessor {
 		std::vector<Converter*> converters;
 		std::vector<wavfile::WavFile*> files;
-		std::vector<unsigned short> input;
+		std::vector<unsigned short> input1;
 		std::vector<unsigned short> input2;
 		std::vector<unsigned short> output;
 		int convFind(std::string convToFind, std::vector<std::string>& converterNames);
-		std::vector<int> read_arguments(std::vector<std::string> source, int converterCode);
 		void init_files(std::vector<std::string> filenames);
 		void init_converters(std::vector<std::vector<std::string>> config);
 	public:
