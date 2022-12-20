@@ -164,11 +164,11 @@ void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
 	unsigned long readPos = 0;
 	unsigned long writePos = wf::DEFAULT_HEADER_SIZE;
 	unsigned long riddenBytes;
-	files[files.size() - 2]->writeHeader();
+	files[files.size() - 1]->writeHeader();
 	int secondFileIndex;
 	for (;;) {
 		riddenBytes = files[0]->readData(input1, readPos);
-		if (riddenBytes == 0) return;
+		if (riddenBytes == 0) break;
 		for (int j = 0; j < converters.size(); j++) {
 			secondFileIndex = converters[j]->secondInputArg();
 			if (secondFileIndex != NO_SECOND_STREAM) {
@@ -177,8 +177,9 @@ void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
 			converters[j]->convert(input1, input2, output, readPos, readPos + input1.size());
 			input1.swap(output);
 		}
-		files[files.size() - 2]->writeData(input1, writePos);
+		files[files.size() - 1]->writeData(input1, writePos);
 		writePos += riddenBytes;
+		readPos += riddenBytes;
 	}
-
+	files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + readPos);
 }

@@ -122,7 +122,7 @@ int wf::WavFile::readData(std::vector<unsigned short> data, int readIndex) {
 	if (open_status == CLOSED) return ZERO;
 	int bufSize = data.size() * 2;
 	std::vector<char> buf(bufSize);
-	static unsigned short* buf_short[DEFAULT_BUF_SIZE];
+	static unsigned short buf_short[DEFAULT_BUF_SIZE];
 	int charToRead;
 	if (readIndex + bufSize >= fileSize) {
 		open_status = CLOSED;
@@ -135,7 +135,7 @@ int wf::WavFile::readData(std::vector<unsigned short> data, int readIndex) {
 	fileStream.seekg(readIndex);
 	fileStream.read(buf.data(), charToRead);
 	std::memcpy(buf_short, buf.data(), charToRead);
-	data.insert(data.end(), buf_short, buf_short + bufSize);
+	data.insert(data.begin(), buf_short, buf_short + bufSize);
 	return charToRead;
 }
 
@@ -145,8 +145,11 @@ void wf::WavFile::writeData(std::vector<unsigned short> data, int writeIndex) {
 	for (int i = 0; i < DEFAULT_BUF_SIZE; i++) {
 		sprintf(buf.data() + i * 2, "%hu", data[i]);
 	}
-	fileStream.seekg(writeIndex);
-	fileStream.write(buf.data(), DEFAULT_BUF_SIZE * 2);
+	//fileStream.seekg(writeIndex);
+	fileStream.seekg(0);
+	if(!(fileStream.write(buf.data(), DEFAULT_BUF_SIZE * 2))) {
+		std::cout << "ZALUPA";
+	}
 };
 
 const bool wf::WavFile::isHeaderCorrect() {

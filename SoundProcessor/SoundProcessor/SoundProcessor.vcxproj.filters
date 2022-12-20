@@ -49,12 +49,6 @@
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav">
       <Filter>Resource Files</Filter>
     </Media>
-    <Media Include="definput.wav">
-      <Filter>Resource Files</Filter>
-    </Media>
-    <Media Include="definput2.wav">
-      <Filter>Resource Files</Filter>
-    </Media>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

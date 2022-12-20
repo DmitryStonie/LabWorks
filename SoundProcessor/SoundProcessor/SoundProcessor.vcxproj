@@ -140,8 +140,6 @@
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="definput.wav" />
-    <Media Include="definput2.wav" />
     <Media Include="H:\Мой диск\Учёба\2 курс\ООП C++\lab3\Samples\severe_tire_damage.wav" />
   </ItemGroup>
   <ItemGroup>
