@@ -30,6 +30,7 @@ namespace wavfile {
 	const bool OPENED = 0;
 	const bool CLOSED = 1;
 	const int ZERO = 0;
+	const int BYTES_PER_SECOND = 88200;
 	enum exceptions {
 		CANNOT_OPEN_FILE = 0,
 		UNSUPPORTED_HEADER = 1
@@ -51,10 +52,10 @@ namespace wavfile {
 		char subchunk2Id[4];			//for "data symbols"
 		unsigned long subchunk2Size;		//bites in data section
 		//data
-		int last_index;
 		int open_status;
 		int firstDataIndex;
 		unsigned long fileSize;
+		unsigned long headerSize;
 		std::fstream fileStream;
 
 		const bool isHeaderCorrect();

@@ -130,6 +130,7 @@
     <ClCompile Include="ArgsContainer.cpp" />
     <ClCompile Include="Configparser.cpp" />
     <ClCompile Include="Converters.cpp" />
+    <ClCompile Include="Errors.cpp" />
     <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="SoundProcessor.cpp" />
   </ItemGroup>
@@ -137,6 +138,7 @@
     <ClInclude Include="Configparser.h" />
     <ClInclude Include="Converters.h" />
     <ClInclude Include="ArgsContainer.h" />
+    <ClInclude Include="Errors.h" />
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <ItemGroup>

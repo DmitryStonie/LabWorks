@@ -1,4 +1,5 @@
 #include "WavFile.h"
+#include "Errors.h"
 #include <fstream>
 
 namespace wf = wavfile;
@@ -44,6 +45,8 @@ void wf::WavFile::setDefaultHeader() {
 	subchunk2Size = 0;	//data part is empty
 	fileSize = DEFAULT_HEADER_SIZE;
 	firstDataIndex = fileSize - subchunk2Size;
+	open_status = CLOSED;
+	headerSize = DEFAULT_HEADER_SIZE;
 }
 
 int wf::WavFile::isOpen() {
@@ -53,11 +56,12 @@ int wf::WavFile::isOpen() {
 void wf::WavFile::changeSize(unsigned long filesize) {
 	chunkSize = filesize - 8;
 	subchunk1Size = PCM_SUBCHUNK_SIZE;
-	subchunk2Size = filesize - DEFAULT_HEADER_SIZE;
+	subchunk2Size = filesize - headerSize;
 	fileSize = filesize;
 }
 
 bool wf::WavFile::readHeader() {
+
 	const int NOT_OPEN = 0;
 	const int BUF_SIZE = 1000;
 	char buf_char[BUF_SIZE];
@@ -81,12 +85,14 @@ bool wf::WavFile::readHeader() {
 		copyStr(subchunk2Id, buf_char, 36, 4);
 		subchunk2SizeIndex = this->readDataChunkId(buf_char, DEFAULT_HEADER_SIZE - sizeof(subchunk2Size), BUF_SIZE);
 		if (subchunk2SizeIndex == 0) {
+			throw 
 			std::cerr << "Header is not a WAV header. Can't use this file\n";
 			return NOT_SUCCESFUL;
 		}
 		copyStr(subchunk2Id, buf_char, subchunk2SizeIndex - 4, 4);
 		std::memcpy(&subchunk2Size, buf_char + subchunk2SizeIndex, 4);
 		fileSize = chunkSize + 8;
+		headerSize = fileSize - subchunk2Size;
 		firstDataIndex = fileSize - subchunk2Size;
 		is_correct = (*this).isHeaderCorrect();
 		if (is_correct == wf::INCORRECT) {

@@ -18,8 +18,8 @@ void cv::Mix::convert(std::vector<unsigned short>& input1, std::vector<unsigned 
 	}
 }
 
-void cv::Mix::initialize(std::vector<std::string> parameters) {
-	interval_start = atoi(parameters[2].data());
+void cv::Mix::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
+	interval_start = atoi(parameters[2].data()) * bytesPerSecond;
 	interval_end = END_OF_FILE;
 	secondStreamNumber = atoi((parameters[1].substr(1)).data());
 }
@@ -40,10 +40,10 @@ void cv::Mute::convert(std::vector<unsigned short>& input1, std::vector<unsigned
 	std::fill(output.begin() + start_index, output.end() - (input1.size() - end_index), ZERO);
 }
 
-void cv::Mute::initialize(std::vector<std::string> parameters) {
+void cv::Mute::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
 	if (parameters.size() < 3) throw 1;
-	interval_start = atoi(parameters[1].data());
-	interval_end = atoi(parameters[2].data());
+	interval_start = atoi(parameters[1].data()) * bytesPerSecond;
+	interval_end = atoi(parameters[2].data()) * bytesPerSecond;
 }
 
 int cv::Mute::secondInputArg() {
@@ -65,9 +65,9 @@ void cv::Lower::convert(std::vector<unsigned short>& input1, std::vector<unsigne
 	}
 }
 
-void cv::Lower::initialize(std::vector<std::string> parameters) {
-	interval_start = atoi(parameters[1].data());
-	interval_end = atoi(parameters[2].data());
+void cv::Lower::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
+	interval_start = atoi(parameters[1].data()) * bytesPerSecond;
+	interval_end = atoi(parameters[2].data()) * bytesPerSecond;
 }
 
 int cv::Lower::secondInputArg() {
@@ -77,13 +77,15 @@ int cv::Lower::secondInputArg() {
 void cv::Converter::convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end) {
 	return;
 }
-void cv::Converter::initialize(std::vector<std::string> parameters) {
+void cv::Converter::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
 	return;
 }
 int cv::Converter::secondInputArg() {
 	return NO_SECOND_STREAM;
 }
+cv::ConverterFactory::~ConverterFactory() {
 
+}
 cv::Converter* cv::ConverterFactory::factoryMethod() {
 	return new cv::Converter();
 }
@@ -116,8 +118,8 @@ cv::SoundProcessor::~SoundProcessor() {
 }
 
 void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>> config, std::vector<std::string> filenames) {
-	init_converters(config);
 	init_files(filenames);
+	init_converters(config);
 	input1.resize(wf::DEFAULT_BUF_SIZE);
 	input2.resize(wf::DEFAULT_BUF_SIZE);
 	output.resize(wf::DEFAULT_BUF_SIZE);
@@ -155,7 +157,7 @@ void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> c
 		item_index = convFind(item, converterNames);
 		if (item_index != cv::NOT_CONVERTER) {
 			converters.push_back(factories[item_index]->factoryMethod());
-			converters[converters.size() - 1]->initialize(config[i]);
+			converters[converters.size() - 1]->initialize(config[i], wf::BYTES_PER_SECOND);
 		}
 	}
 }
