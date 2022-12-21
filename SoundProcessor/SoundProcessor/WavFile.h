@@ -60,20 +60,23 @@ namespace wavfile {
 		int readDataChunkId(char* array, int pos, int array_size);
 		const char* num_str(unsigned long number);
 		const char* num_str(unsigned short number);
+		void writeBytes(char* destination, const char* source, int source_size);
 	public:
 		WavFile();
 		~WavFile();
 		void initialize(std::string filename);
 		void changeSize(unsigned long filesize);
+		int returnDatasize();
 		int isOpen();
 		void outInitialize(std::string filename);
 		unsigned long returnDataPos();
 		void setDefaultHeader();
+		unsigned long returnHeadersize();
 		
 		void readHeader();
 		void writeHeader();
 		int readData(std::vector<unsigned short> data, int readIndex);
-		void writeData(std::vector<unsigned short> data, int writeIndex);
+		void writeData(std::vector<unsigned short> data, int writeIndex, int bytesCount);
 	};
 
 }

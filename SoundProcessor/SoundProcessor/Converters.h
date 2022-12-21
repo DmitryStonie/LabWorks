@@ -8,7 +8,7 @@ namespace converter {
 	const std::string MIX_STR = "mix";
 	const std::string MUTE_STR = "mute";
 	const std::string LOWER_STR = "lower";
-	unsigned long END_OF_FILE = 4294967295;
+	const int MAX_DATA_SIZE = UINT32_MAX;
 	const int NO_SECOND_STREAM = -1;
 	const int NOT_OPENED = 1;
 	const int ZERO = 0;
@@ -25,7 +25,7 @@ namespace converter {
 		int secondStreamNumber;
 	public:
 		virtual void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
-		virtual void initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond);
+		virtual void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		virtual int secondInputArg();
 		virtual ~Converter() {}
 	};
@@ -33,21 +33,21 @@ namespace converter {
 	class Mix : public Converter {
 	public:
 		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
-		void initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond);
+		void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int secondInputArg();
 	};
 
 	class Mute : public Converter {
 	public:
 		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
-		void initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond);
+		void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int secondInputArg();
 	};
 
 	class Lower : public Converter {
 	public:
 		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
-		void initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond);
+		void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int secondInputArg();
 	};
 
@@ -77,14 +77,15 @@ namespace converter {
 		std::vector<unsigned short> input1;
 		std::vector<unsigned short> input2;
 		std::vector<unsigned short> output;
-		int convFind(std::string convToFind, std::vector<std::string>& converterNames);
-		void init_files(std::vector<std::string> filenames);
-		void init_converters(std::vector<std::vector<std::string>> config);
+		int convFind(std::string& convToFind, std::vector<std::string>& converterNames);
+		void init_files(std::vector<std::string>& filenames);
+		void init_converters(std::vector<std::vector<std::string>>& config);
+		int countMaxSize();
 	public:
 		SoundProcessor();
 		~SoundProcessor();
-		void initialize(std::vector<std::vector<std::string>> config, std::vector<std::string> filenames);
-		void run(std::vector<std::string> fileNames);
+		void initialize(std::vector<std::vector<std::string>>& config, std::vector<std::string>& filenames);
+		void run(std::vector<std::string>& fileNames);
 
 	};
 }

@@ -1,7 +1,7 @@
 #include "Converters.h"
 #include "WavFile.h"
 #include "Errors.h"
-#include <limits.h>
+#include <limits>
 #include <algorithm>
 
 namespace cv = converter;
@@ -19,9 +19,10 @@ void cv::Mix::convert(std::vector<unsigned short>& input1, std::vector<unsigned 
 	}
 }
 
-void cv::Mix::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
+void cv::Mix::initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond) {
+	if (parameters.size() < 3) return;
 	interval_start = atoi(parameters[2].data()) * bytesPerSecond;
-	interval_end = END_OF_FILE;
+	interval_end = MAX_DATA_SIZE;
 	secondStreamNumber = atoi((parameters[1].substr(1)).data());
 }
 
@@ -41,8 +42,8 @@ void cv::Mute::convert(std::vector<unsigned short>& input1, std::vector<unsigned
 	std::fill(output.begin() + start_index, output.end() - (input1.size() - end_index), ZERO);
 }
 
-void cv::Mute::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
-	if (parameters.size() < 3) throw 1;
+void cv::Mute::initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond) {
+	if (parameters.size() < 3) return;
 	interval_start = atoi(parameters[1].data()) * bytesPerSecond;
 	interval_end = atoi(parameters[2].data()) * bytesPerSecond;
 }
@@ -66,7 +67,8 @@ void cv::Lower::convert(std::vector<unsigned short>& input1, std::vector<unsigne
 	}
 }
 
-void cv::Lower::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
+void cv::Lower::initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond) {
+	if (parameters.size() < 3) return;	//errors, need to destroy converter or not use it
 	interval_start = atoi(parameters[1].data()) * bytesPerSecond;
 	interval_end = atoi(parameters[2].data()) * bytesPerSecond;
 }
@@ -78,7 +80,7 @@ int cv::Lower::secondInputArg() {
 void cv::Converter::convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end) {
 	return;
 }
-void cv::Converter::initialize(std::vector<std::string> parameters, unsigned long bytesPerSecond) {
+void cv::Converter::initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond) {
 	return;
 }
 int cv::Converter::secondInputArg() {
@@ -118,7 +120,7 @@ cv::SoundProcessor::~SoundProcessor() {
 
 }
 
-void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>> config, std::vector<std::string> filenames) {
+void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>>& config, std::vector<std::string>& filenames) {
 	try {
 		init_files(filenames);
 		init_converters(config);
@@ -131,14 +133,14 @@ void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>> config
 	}
 }
 
-int cv::SoundProcessor::convFind(std::string convToFind, std::vector<std::string> &converterNames) {
+int cv::SoundProcessor::convFind(std::string& convToFind, std::vector<std::string> &converterNames) {
 	for (int i = 0; i < converterNames.size(); i++) {
 		if (converterNames[i] == convToFind) return i;
 	}
 	return converterNames.size() + 1;
 }
 
-void cv::SoundProcessor::init_files(std::vector<std::string> filenames) {
+void cv::SoundProcessor::init_files(std::vector<std::string>& filenames) {
 	try {
 		for (int i = 0; i < filenames.size() - 2; i++) {
 			files.push_back(new wavfile::WavFile);
@@ -150,14 +152,14 @@ void cv::SoundProcessor::init_files(std::vector<std::string> filenames) {
 		}
 		files.push_back(new wavfile::WavFile);
 		files[filenames.size() - 2]->outInitialize(filenames[filenames.size() - 2]);
-		files[files.size() - 2]->setDefaultHeader();
+		files[files.size() - 1]->setDefaultHeader();
 	}
 	catch (int errCode) {
 		throw errCode;
 	}
 }
 
-void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> config) {
+void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>>& config) {
 	std::vector<std::string> converterNames = { MIX_STR, MUTE_STR, LOWER_STR };
 	std::string item;
 	cv::ConverterFactory factory;
@@ -177,14 +179,25 @@ void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> c
 		throw errCode;
 	}
 }
+int cv::SoundProcessor::countMaxSize() {
+	unsigned long tmpSize = UINT32_MAX, tmp = 0;
+	for (int i = 0; i < files.size() - 1; i++) {
+		tmp = files[i]->returnDatasize();
+		if (tmp < tmpSize) tmpSize = tmp;
+	}
+	return tmpSize;
+}
 
-void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
+void cv::SoundProcessor::run(std::vector<std::string>& fileNames) {
 	errors::errorCodes errout;
 	unsigned long readPos = 0;
-	unsigned long writePos = wf::DEFAULT_HEADER_SIZE;
+	unsigned long writePos = 0;
 	unsigned long riddenBytes;
+	int outputFileSize = (*this).countMaxSize();
+	files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + outputFileSize);
 	try{
 		files[files.size() - 1]->writeHeader();
+		writePos += files[files.size() - 1]->returnHeadersize();
 		int secondFileIndex;
 		for (;;) {
 			riddenBytes = files[0]->readData(input1, readPos);
@@ -197,11 +210,10 @@ void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
 				converters[j]->convert(input1, input2, output, readPos, readPos + input1.size());
 				input1.swap(output);
 			}
-			files[files.size() - 1]->writeData(input1, writePos);
+			files[files.size() - 1]->writeData(input1, writePos, riddenBytes);
 			writePos += riddenBytes;
 			readPos += riddenBytes;
 		}
-		files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + readPos);
 	}
 	catch (int errCode) {
 		throw errCode;

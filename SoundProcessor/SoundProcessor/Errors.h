@@ -11,16 +11,17 @@ namespace errors {
 		CORRUPTED_HEADER = 2,
 		WRITE_ERROR = 3,
 		READ_ERROR = 4,
-		INVALID_COMMAND_LINE_ARGUMENTS = 5
+		INVALID_COMMAND_LINE_ARGUMENTS = 5,
+
 	};
 	class ErrorOutput {
 		std::map<int, const std::string> errors = {
-			{CANNOT_OPEN_FILE,""},
-			{UNSUPPORTED_FILE_FORMAT,"Header is not a WAV header. Can't use this file\n"},
-			{CORRUPTED_HEADER,"Header is corrupted\n"},
-			{WRITE_ERROR,"Cannot write data to file\n"},
-			{READ_ERROR,"Cannot read data to file\n"},
-			{INVALID_COMMAND_LINE_ARGUMENTS, "Error. Invalid Command line arguments\n"},
+			{CANNOT_OPEN_FILE,"Error: can't open file"},
+			{UNSUPPORTED_FILE_FORMAT,"Error: Header is not a WAV header. Can't use this file\n"},
+			{CORRUPTED_HEADER,"Error: Header is corrupted\n"},
+			{WRITE_ERROR,"Error: Cannot write data to file\n"},
+			{READ_ERROR,"Error: Cannot read data to file\n"},
+			{INVALID_COMMAND_LINE_ARGUMENTS, "Error: Invalid Command line arguments\n"},
 		};
 	public:
 		ErrorOutput();
