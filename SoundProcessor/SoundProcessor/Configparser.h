@@ -15,8 +15,8 @@ namespace configparser {
 		void write_arguments(std::string line);
 	public:
 		ConfigParser();
-		ConfigParser(std::string filename, std::vector<std::string> converters);
 		~ConfigParser();
+		void initialize(std::string filename, std::vector<std::string> converters);
 		std::vector<std::vector<std::string>> return_config();
 	};
 }

@@ -16,7 +16,7 @@ namespace argscontainer {
 	public:
 		ArgsContainer();
 		~ArgsContainer();
-		ArgsContainer(int argc, char** argv);
+		void readArguments(int argc, char** argv);
 		std::vector<std::string> returnArguments();
 	};
 }

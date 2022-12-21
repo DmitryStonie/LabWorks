@@ -1,5 +1,6 @@
-#include "ArgsContainer.h"
 #include <iostream>
+#include "ArgsContainer.h"
+#include "Errors.h"
 
 namespace ac = argscontainer;
 
@@ -11,7 +12,7 @@ ac::ArgsContainer::~ArgsContainer() {
 
 }
 
-ac::ArgsContainer::ArgsContainer(int argc, char** argv) {
+void ac::ArgsContainer::readArguments(int argc, char** argv) {
 	setDefaultArgs();
 	po::options_description hidden;
 	hidden.add_options()
@@ -32,12 +33,12 @@ ac::ArgsContainer::ArgsContainer(int argc, char** argv) {
 	try {
 		po::store(po::command_line_parser(argc, argv).options(descriptor).positional(pos_descriptor).run(), var_map);
 		po::notify(var_map);
-		if (var_map.count("-h")) {
+		if (var_map.count("-h")) { 
 			std::cout << Allowed << '\n';
 		}
 	}
 	catch (const po::error& e) {
-		std::cout << "Error. Invalid command line arguments\n";
+		throw errors::INVALID_COMMAND_LINE_ARGUMENTS;
 	}
 }
 

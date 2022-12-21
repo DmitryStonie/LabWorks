@@ -21,7 +21,7 @@
     <ClCompile Include="WavFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Configparser.cpp">
+    <ClCompile Include="ConfigParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Converters.cpp">
@@ -38,7 +38,7 @@
     <ClInclude Include="WavFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Configparser.h">
+    <ClInclude Include="ConfigParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Converters.h">

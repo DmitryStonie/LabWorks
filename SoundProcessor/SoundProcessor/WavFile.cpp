@@ -3,6 +3,7 @@
 #include <fstream>
 
 namespace wf = wavfile;
+namespace es = errors;
 
 wf::WavFile::WavFile() {
 	(*this).setDefaultHeader();
@@ -13,19 +14,22 @@ wf::WavFile::~WavFile() {
 }
 
 void wf::WavFile::initialize(std::string filename) {
-	fileStream.open(filename, std::ios_base::in | std::ios_base::binary);
-	if (!(fileStream.is_open())) {
+	try {
+		fileStream.open(filename, std::ios_base::in | std::ios_base::binary);
+		if (!(fileStream.is_open())) {
+			setDefaultHeader();
+			open_status = CLOSED;
+			throw es::CANNOT_OPEN_FILE;
+		}
+		readHeader();
+		throw es::UNSUPPORTED_FILE_FORMAT;
+		open_status = OPENED;
+	}
+	catch (int errCode) {
 		setDefaultHeader();
 		open_status = CLOSED;
-		throw CANNOT_OPEN_FILE;
+		throw errCode;
 	}
-	bool header_status = readHeader();
-	if(header_status == NOT_SUCCESFUL) {
-		open_status = CLOSED;
-		throw UNSUPPORTED_HEADER;
-		setDefaultHeader();
-	}
-	open_status = OPENED;
 }
 
 void wf::WavFile::setDefaultHeader() {
@@ -60,15 +64,13 @@ void wf::WavFile::changeSize(unsigned long filesize) {
 	fileSize = filesize;
 }
 
-bool wf::WavFile::readHeader() {
-
+void wf::WavFile::readHeader() {
 	const int NOT_OPEN = 0;
 	const int BUF_SIZE = 1000;
 	char buf_char[BUF_SIZE];
 	int subchunk2SizeIndex;
 	if (!(fileStream.read(buf_char, BUF_SIZE))) {
-		std::cerr << "Header is corrupted.\n";
-		return NOT_SUCCESFUL;
+		throw es::CORRUPTED_HEADER;
 	}
 	else {
 		copyStr(chunkId, buf_char, 0, 4);
@@ -85,9 +87,7 @@ bool wf::WavFile::readHeader() {
 		copyStr(subchunk2Id, buf_char, 36, 4);
 		subchunk2SizeIndex = this->readDataChunkId(buf_char, DEFAULT_HEADER_SIZE - sizeof(subchunk2Size), BUF_SIZE);
 		if (subchunk2SizeIndex == 0) {
-			throw 
-			std::cerr << "Header is not a WAV header. Can't use this file\n";
-			return NOT_SUCCESFUL;
+			throw es::UNSUPPORTED_FILE_FORMAT;
 		}
 		copyStr(subchunk2Id, buf_char, subchunk2SizeIndex - 4, 4);
 		std::memcpy(&subchunk2Size, buf_char + subchunk2SizeIndex, 4);
@@ -96,14 +96,12 @@ bool wf::WavFile::readHeader() {
 		firstDataIndex = fileSize - subchunk2Size;
 		is_correct = (*this).isHeaderCorrect();
 		if (is_correct == wf::INCORRECT) {
-			std::cerr << "Header is not a WAV header. Can't use this file\n";
-			return NOT_SUCCESFUL;
+			throw es::UNSUPPORTED_FILE_FORMAT;
 		}
 	}
-	return SUCCESFUL;
 }
 
-void wf::WavFile::writeHeader() {
+void wf::WavFile::writeHeader() {	//it will work WRONG! size change 
 	char out[DEFAULT_HEADER_SIZE];
 	strcat(out, chunkId);
 	strcat(out, num_str(chunkSize));
@@ -119,9 +117,9 @@ void wf::WavFile::writeHeader() {
 	strcat(out, subchunk2Id);
 	strcat(out, num_str(subchunk2Size));
 	fileStream.write(out, DEFAULT_HEADER_SIZE);
+	if (fileStream.bad()) throw es::WRITE_ERROR;
 	fileSize += DEFAULT_HEADER_SIZE;
 	firstDataIndex = DEFAULT_HEADER_SIZE;
-
 }
 
 int wf::WavFile::readData(std::vector<unsigned short> data, int readIndex) {
@@ -140,6 +138,7 @@ int wf::WavFile::readData(std::vector<unsigned short> data, int readIndex) {
 	readIndex = readIndex + firstDataIndex;
 	fileStream.seekg(readIndex);
 	fileStream.read(buf.data(), charToRead);
+	if (fileStream.bad()) throw es::READ_ERROR;
 	std::memcpy(buf_short, buf.data(), charToRead);
 	data.insert(data.begin(), buf_short, buf_short + bufSize);
 	return charToRead;
@@ -151,11 +150,9 @@ void wf::WavFile::writeData(std::vector<unsigned short> data, int writeIndex) {
 	for (int i = 0; i < DEFAULT_BUF_SIZE; i++) {
 		sprintf(buf.data() + i * 2, "%hu", data[i]);
 	}
-	//fileStream.seekg(writeIndex);
-	fileStream.seekg(0);
-	if(!(fileStream.write(buf.data(), DEFAULT_BUF_SIZE * 2))) {
-		std::cout << "ZALUPA";
-	}
+	fileStream.seekg(writeIndex);
+	fileStream.write(buf.data(), DEFAULT_BUF_SIZE * 2);
+	if (fileStream.bad()) throw es::WRITE_ERROR;
 };
 
 const bool wf::WavFile::isHeaderCorrect() {
@@ -217,7 +214,7 @@ unsigned long wf::WavFile::returnDataPos() {
 void wf::WavFile::outInitialize(std::string filename) {
 	fileStream.open(filename, std::ios_base::out | std::ios_base::binary);
 	if (!(fileStream.is_open())) {
-		throw CANNOT_OPEN_FILE;
+		throw es::CANNOT_OPEN_FILE;
 	}
 	setDefaultHeader();
 }

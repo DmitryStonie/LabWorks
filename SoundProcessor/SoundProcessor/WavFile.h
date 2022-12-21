@@ -5,7 +5,6 @@
 #include <fstream>
 
 namespace wavfile {
-	const int HEADER_SIZE = 40;
 	const int DEFAULT_HEADER_SIZE = 44;
 	const int DEFAULT_RATE = 44100;
 	const int DEFAULT_CHANNELS = 1;
@@ -31,26 +30,22 @@ namespace wavfile {
 	const bool CLOSED = 1;
 	const int ZERO = 0;
 	const int BYTES_PER_SECOND = 88200;
-	enum exceptions {
-		CANNOT_OPEN_FILE = 0,
-		UNSUPPORTED_HEADER = 1
-	};
 	class WavFile {
 		//header
 		bool is_correct;
 		char chunkId[4];				//for "RIFF" symbols
-		unsigned long chunkSize;			//filesize - 8
+		unsigned long chunkSize;		//filesize - 8
 		char format[4];					//for "WAVE" symbols
 		char subchunk1Id[4];			//for "fmt " symbols
-		unsigned long subchunk1Size;		//filesize - 16
-		unsigned short audioFormat;			//1 for PCM - linear
-		unsigned short numChannels;			//mono = 1
-		unsigned long sampleRate;			//44100 Hz
-		unsigned long byteRate;				// sampleRate * numChannels * bitsPerSample/8
-		unsigned short blockAlign;			//numChannels * bitsPerSample/8   - bytes for 1 sample
-		unsigned short bitsPerSample;		//sound depth
+		unsigned long subchunk1Size;	//filesize - 16
+		unsigned short audioFormat;		//1 for PCM - linear
+		unsigned short numChannels;		//mono = 1
+		unsigned long sampleRate;		//44100 Hz
+		unsigned long byteRate;			// sampleRate * numChannels * bitsPerSample/8
+		unsigned short blockAlign;		//numChannels * bitsPerSample/8   - bytes for 1 sample
+		unsigned short bitsPerSample;	//sound depth
 		char subchunk2Id[4];			//for "data symbols"
-		unsigned long subchunk2Size;		//bites in data section
+		unsigned long subchunk2Size;	//bites in data section
 		//data
 		int open_status;
 		int firstDataIndex;
@@ -69,13 +64,13 @@ namespace wavfile {
 		WavFile();
 		~WavFile();
 		void initialize(std::string filename);
-		void setDefaultHeader();
 		void changeSize(unsigned long filesize);
 		int isOpen();
 		void outInitialize(std::string filename);
 		unsigned long returnDataPos();
+		void setDefaultHeader();
 		
-		bool readHeader();
+		void readHeader();
 		void writeHeader();
 		int readData(std::vector<unsigned short> data, int readIndex);
 		void writeData(std::vector<unsigned short> data, int writeIndex);

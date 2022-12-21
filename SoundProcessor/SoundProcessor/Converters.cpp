@@ -1,5 +1,6 @@
 #include "Converters.h"
 #include "WavFile.h"
+#include "Errors.h"
 #include <limits.h>
 #include <algorithm>
 
@@ -118,11 +119,16 @@ cv::SoundProcessor::~SoundProcessor() {
 }
 
 void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>> config, std::vector<std::string> filenames) {
-	init_files(filenames);
-	init_converters(config);
-	input1.resize(wf::DEFAULT_BUF_SIZE);
-	input2.resize(wf::DEFAULT_BUF_SIZE);
-	output.resize(wf::DEFAULT_BUF_SIZE);
+	try {
+		init_files(filenames);
+		init_converters(config);
+		input1.resize(wf::DEFAULT_BUF_SIZE);
+		input2.resize(wf::DEFAULT_BUF_SIZE);
+		output.resize(wf::DEFAULT_BUF_SIZE);
+	}
+	catch (int errCode) {
+		throw errCode;
+	}
 }
 
 int cv::SoundProcessor::convFind(std::string convToFind, std::vector<std::string> &converterNames) {
@@ -133,17 +139,22 @@ int cv::SoundProcessor::convFind(std::string convToFind, std::vector<std::string
 }
 
 void cv::SoundProcessor::init_files(std::vector<std::string> filenames) {
-	for (int i = 0; i < filenames.size() - 2; i++) {
-		files.push_back(new wavfile::WavFile);
-		files[i]->initialize(filenames[i]);
-		if (files[i]->isOpen() == NOT_OPENED) {
-			delete files[i];
-			files[i] == NULL;
+	try {
+		for (int i = 0; i < filenames.size() - 2; i++) {
+			files.push_back(new wavfile::WavFile);
+			files[i]->initialize(filenames[i]);
+			if (files[i]->isOpen() == NOT_OPENED) {
+				delete files[i];
+				files[i] == NULL;
+			}
 		}
+		files.push_back(new wavfile::WavFile);
+		files[filenames.size() - 2]->outInitialize(filenames[filenames.size() - 2]);
+		files[files.size() - 2]->setDefaultHeader();
 	}
-	files.push_back(new wavfile::WavFile);
-	files[filenames.size() - 2]->outInitialize(filenames[filenames.size() - 2]);
-	files[files.size() - 2]->setDefaultHeader();
+	catch (int errCode) {
+		throw errCode;
+	}
 }
 
 void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> config) {
@@ -152,36 +163,47 @@ void cv::SoundProcessor::init_converters(std::vector<std::vector<std::string>> c
 	cv::ConverterFactory factory;
 	std::vector<ConverterFactory*> factories = factory.initialize_array();
 	int item_index = 0;
-	for (int i = 0; i < config.size(); i++) {
-		item = config[i][0];
-		item_index = convFind(item, converterNames);
-		if (item_index != cv::NOT_CONVERTER) {
-			converters.push_back(factories[item_index]->factoryMethod());
-			converters[converters.size() - 1]->initialize(config[i], wf::BYTES_PER_SECOND);
+	try {
+		for (int i = 0; i < config.size(); i++) {
+			item = config[i][0];
+			item_index = convFind(item, converterNames);
+			if (item_index != cv::NOT_CONVERTER) {
+				converters.push_back(factories[item_index]->factoryMethod());
+				converters[converters.size() - 1]->initialize(config[i], wf::BYTES_PER_SECOND);
+			}
 		}
+	}
+	catch (int errCode) {
+		throw errCode;
 	}
 }
 
 void cv::SoundProcessor::run(std::vector<std::string> fileNames) {
+	errors::errorCodes errout;
 	unsigned long readPos = 0;
 	unsigned long writePos = wf::DEFAULT_HEADER_SIZE;
 	unsigned long riddenBytes;
-	files[files.size() - 1]->writeHeader();
-	int secondFileIndex;
-	for (;;) {
-		riddenBytes = files[0]->readData(input1, readPos);
-		if (riddenBytes == 0) break;
-		for (int j = 0; j < converters.size(); j++) {
-			secondFileIndex = converters[j]->secondInputArg();
-			if (secondFileIndex != NO_SECOND_STREAM) {
-				files[secondFileIndex]->readData(input2, readPos);
+	try{
+		files[files.size() - 1]->writeHeader();
+		int secondFileIndex;
+		for (;;) {
+			riddenBytes = files[0]->readData(input1, readPos);
+			if (riddenBytes == 0) break;
+			for (int j = 0; j < converters.size(); j++) {
+				secondFileIndex = converters[j]->secondInputArg();
+				if (secondFileIndex != NO_SECOND_STREAM) {
+					files[secondFileIndex]->readData(input2, readPos);
+				}
+				converters[j]->convert(input1, input2, output, readPos, readPos + input1.size());
+				input1.swap(output);
 			}
-			converters[j]->convert(input1, input2, output, readPos, readPos + input1.size());
-			input1.swap(output);
+			files[files.size() - 1]->writeData(input1, writePos);
+			writePos += riddenBytes;
+			readPos += riddenBytes;
 		}
-		files[files.size() - 1]->writeData(input1, writePos);
-		writePos += riddenBytes;
-		readPos += riddenBytes;
+		files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + readPos);
 	}
-	files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + readPos);
+	catch (int errCode) {
+		throw errCode;
+	}
 }

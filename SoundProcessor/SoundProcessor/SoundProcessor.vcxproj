@@ -128,14 +128,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ArgsContainer.cpp" />
-    <ClCompile Include="Configparser.cpp" />
+    <ClCompile Include="ConfigParser.cpp" />
     <ClCompile Include="Converters.cpp" />
     <ClCompile Include="Errors.cpp" />
     <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="SoundProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Configparser.h" />
+    <ClInclude Include="ConfigParser.h" />
     <ClInclude Include="Converters.h" />
     <ClInclude Include="ArgsContainer.h" />
     <ClInclude Include="Errors.h" />
