@@ -81,7 +81,8 @@ namespace converter {
 		void init_files(std::vector<std::string>& filenames);
 		void init_converters(std::vector<std::vector<std::string>>& config);
 		int countMaxSize();
-	public:
+		int biggestFileInd();
+	;	public:
 		SoundProcessor();
 		~SoundProcessor();
 		void initialize(std::vector<std::vector<std::string>>& config, std::vector<std::string>& filenames);

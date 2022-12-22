@@ -220,12 +220,25 @@ int wf::WavFile::returnDatasize() {
 	return subchunk2Size;
 }
 
+int wf::WavFile::returnHeadersize() {
+	return headerSize;
+}
+
+char* wf::WavFile::returnheader() {
+	char buf[1000];
+	fileStream.seekg(0);
+	fileStream.read(buf, fileSize - subchunk2Size);
+	return buf;
+}
+
+void wf::WavFile::writeChars(char* data, int writeIndex, int bytesCount) {
+	fileStream.seekg(writeIndex);
+	fileStream.write(data, bytesCount);
+	if (fileStream.bad()) throw es::WRITE_ERROR;
+}
+
 void wf::WavFile::writeBytes(char* destination, const char* source, int source_size) {
 	for (int i = 0; i < source_size; i++) {
 		destination[i] = source[i];
 	}
-}
-
-unsigned long wf::WavFile::returnHeadersize() {
-	return headerSize;
 }

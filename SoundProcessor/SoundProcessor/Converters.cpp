@@ -194,10 +194,11 @@ void cv::SoundProcessor::run(std::vector<std::string>& fileNames) {
 	unsigned long writePos = 0;
 	unsigned long riddenBytes;
 	int outputFileSize = (*this).countMaxSize();
-	files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + outputFileSize);
+	int maxFile = (*this).biggestFileInd();
+	//files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + outputFileSize);
 	try{
-		files[files.size() - 1]->writeHeader();
-		writePos += files[files.size() - 1]->returnHeadersize();
+		files[files.size() - 1]->writeChars(files[maxFile]->returnheader(), 0, files[maxFile]->returnHeadersize());
+		writePos += files[maxFile]->returnHeadersize();
 		int secondFileIndex;
 		for (;;) {
 			riddenBytes = files[0]->readData(input1, readPos);
@@ -220,3 +221,14 @@ void cv::SoundProcessor::run(std::vector<std::string>& fileNames) {
 	}
 }
 
+int converter::SoundProcessor::biggestFileInd() {
+	unsigned long tmpSize = UINT32_MAX, tmp = 0, maxIndex = 0;
+	for (int i = 0; i < files.size() - 1; i++) {
+		tmp = files[i]->returnDatasize();
+		if (tmp < tmpSize) {
+			tmpSize = tmp;
+			maxIndex = i;
+		}
+	}
+	return maxIndex;
+}
