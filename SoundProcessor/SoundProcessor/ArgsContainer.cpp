@@ -5,24 +5,27 @@
 namespace ac = argscontainer;
 
 ac::ArgsContainer::ArgsContainer() {
-	setDefaultArgs();
+	filenames[CONFIG_FILES].push_back(DEFAULT_CONFIG);
+	filenames[INPUT_FILES].push_back(DEFAULT_INPUT);
+	filenames[INPUT_FILES].push_back(DEFAULT_INPUT2);
+	filenames[OUTPUT_FILES].push_back(DEFAULT_OUTPUT);
 }
 
 ac::ArgsContainer::~ArgsContainer() {
 
 }
 
-void ac::ArgsContainer::readArguments(int argc, char** argv) {
+std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int argc, char** argv) {
 	setDefaultArgs();
 	po::options_description hidden;
 	hidden.add_options()
-		("outputFile", po::value<std::string>(&outputFile), "Output file")
-		("inputFile", po::value<std::vector<std::string>>(&inputFiles), "Input file")
+		("outputFile", po::value<std::vector<std::string>>(&filenames[OUTPUT_FILES]), "Output file")
+		("inputFile", po::value<std::vector<std::string>>(&filenames[INPUT_FILES]), "Input file")
 		;
 	po::options_description Allowed("Allowed options");
 	Allowed.add_options()
 		(",h", "Produces help message")
-		(",c", po::value<std::string>(&configFile), "Configuration file")
+		(",c", po::value<std::vector<std::string>>(&filenames[CONFIG_FILES]), "Configuration file")
 		;
 	po::options_description descriptor;
 	descriptor.add(Allowed).add(hidden);
@@ -40,19 +43,5 @@ void ac::ArgsContainer::readArguments(int argc, char** argv) {
 	catch (const po::error& e) {
 		throw errors::INVALID_COMMAND_LINE_ARGUMENTS;
 	}
-}
-
-std::vector<std::string> ac::ArgsContainer::returnArguments() {
-	std::vector<std::string> arguments(inputFiles);
-	arguments.push_back(outputFile);
-	arguments.push_back(configFile);
-	return arguments;
-}
-
-void ac::ArgsContainer::setDefaultArgs() {
-	configFile = DEFAULT_CONFIG;
-	outputFile = DEFAULT_OUTPUT;
-	inputFiles.resize(0);
-	inputFiles.push_back(DEFAULT_INPUT);
-	inputFiles.push_back(DEFAULT_INPUT2);
+	return filenames;
 }

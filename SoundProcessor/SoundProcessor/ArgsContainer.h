@@ -5,18 +5,21 @@ namespace po = boost::program_options;
 
 namespace argscontainer {
 	const std::string DEFAULT_CONFIG = "defconfig.txt";
-	const std::string DEFAULT_INPUT = "definput.wav";
+	const std::string DEFAULT_INPUT = "definput1.wav";
 	const std::string DEFAULT_INPUT2 = "definput2.wav";
 	const std::string DEFAULT_OUTPUT = "defoutput.wav";
+	enum filepositions {
+		CONFIG_FILES = 0,
+		INPUT_FILES = 1,
+		OUTPUT_FILES = 2
+	};
+	const int CONFIG_POS = 0;
+	const int OUTPUT_POS = 0;
 	class ArgsContainer {
-		std::string configFile;
-		std::string outputFile;
-		std::vector<std::string> inputFiles;
-		void setDefaultArgs();
+		std::vector<std::vector<std::string>> filenames;
 	public:
 		ArgsContainer();
 		~ArgsContainer();
-		void readArguments(int argc, char** argv);
-		std::vector<std::string> returnArguments();
+		std::vector<std::vector<std::string>> returnFilenames(int argc, char** argv);
 	};
 }

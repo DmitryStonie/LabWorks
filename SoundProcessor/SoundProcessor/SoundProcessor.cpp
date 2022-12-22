@@ -16,12 +16,11 @@ int main(int argc, char ** argv)
     es::ErrorOutput errout;
     try {
         ac::ArgsContainer argcount;
-        argcount.readArguments(argc, argv);
-        std::vector<std::string> filenames;
-        filenames = argcount.returnArguments();
+        std::vector<std::vector<std::string>> filenames;
+        filenames = argcount.returnFilenames(argc, argv);
         std::vector<std::string> converterNames = { cv::MIX_STR, cv::MUTE_STR, cv::LOWER_STR };
         cp::ConfigParser configuration;
-        configuration.initialize(filenames[filenames.size() - 1], converterNames);
+        configuration.initialize(filenames[ac::CONFIG_FILES][ac::CONFIG_POS], converterNames);
         std::vector<std::vector<std::string>> config = configuration.return_config();
         cv::SoundProcessor soundChanger;
         soundChanger.initialize(config, filenames);
