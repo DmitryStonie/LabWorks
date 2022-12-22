@@ -30,9 +30,8 @@ void wf::WavFile::initialize(std::string filename) {
 }
 
 void wf::WavFile::setDefaultHeader() {
-	is_correct = wf::CORRECT;
 	writeBytes(chunkId, wf::RIFF_CHAIN, 4);
-	chunkSize = wf::DEFAULT_HEADER_SIZE - 4;	//data part is empty
+	chunkSize = DEFAULT_CHUNK_SIZE;	//data part is empty
 	writeBytes(format, wf::WAVE_FORMAT, 4);
 	writeBytes(subchunk1Id, wf::FMT_SUBCHAIN, 4);
 	subchunk1Size = wf::PCM_SUBCHUNK_SIZE;	//for PCM
@@ -40,14 +39,15 @@ void wf::WavFile::setDefaultHeader() {
 	numChannels = wf::DEFAULT_CHANNELS;
 	sampleRate = wf::DEFAULT_RATE;
 	bitsPerSample = wf::DEFAULT_BITS_PER_SAMPLE;
-	byteRate = sampleRate * numChannels * bitsPerSample / 8;	// 1 byte = 8 bits
-	blockAlign = numChannels * bitsPerSample / 8;
+	byteRate = wf::BYTES_PER_SECOND;	// 1 byte = 8 bits
+	blockAlign = DEFAULT_BLOCK_ALIGN;
 	writeBytes(subchunk2Id, wf::DATA_SUBCHAIN, 4);
-	subchunk2Size = 0;	//data part is empty
+	subchunk2Size = DEFAULT_DATA_SIZE;	//data part is empty
 	fileSize = DEFAULT_HEADER_SIZE;
 	firstDataIndex = fileSize - subchunk2Size;
 	open_status = CLOSED;
 	headerSize = DEFAULT_HEADER_SIZE;
+	is_correct = wf::CORRECT;
 }
 
 int wf::WavFile::isOpen() {
@@ -56,8 +56,7 @@ int wf::WavFile::isOpen() {
 
 void wf::WavFile::changeSize(unsigned long filesize) {
 	chunkSize = filesize - 8;
-	subchunk1Size = PCM_SUBCHUNK_SIZE;
-	subchunk2Size = filesize - headerSize;
+	subchunk2Size = filesize - DEFAULT_HEADER_SIZE;
 	fileSize = filesize;
 }
 
@@ -98,7 +97,7 @@ void wf::WavFile::readHeader() {
 	}
 }
 
-void wf::WavFile::writeHeader() { 
+void wf::WavFile::writeHeader() {
 	char out[DEFAULT_HEADER_SIZE];
 	writeBytes(out, chunkId, 4);
 	writeBytes(out + 4, num_str(chunkSize), 4);
@@ -113,6 +112,7 @@ void wf::WavFile::writeHeader() {
 	writeBytes(out + 34, num_str(bitsPerSample), 2);
 	writeBytes(out + 36, subchunk2Id, 4);
 	writeBytes(out + 40, num_str(subchunk2Size), 4);
+	fileStream.seekg(0);
 	fileStream.write(out, DEFAULT_HEADER_SIZE);
 	if (fileStream.bad()) throw es::WRITE_ERROR;
 }
@@ -172,7 +172,7 @@ void wf::WavFile::copyStr( char* destination, const char* source, const int sour
 	}
 }
 
-int wf::WavFile::compareId(const  char* id1, const  char* id2) {
+int wf::WavFile::compareId(char* id1, const  char* id2) {
 	for (int i = 0; i < 4; i++) {
 		if (id1[i] != id2[i]) return UNEQUAL;
 	}
@@ -206,14 +206,6 @@ const char* wf::WavFile::num_str(unsigned short number) {
 		number /= CHAR_SIZE;
 	}
 	return tmp_str;
-	//static std::string tmp_str;
-	//tmp_str = std::to_string(number);
-	//tmp_str = tmp_str.substr(0, 4);
-	//return tmp_str.data();
-}
-
-unsigned long wf::WavFile::returnDataPos() {
-	return fileSize - subchunk2Size;
 }
 
 void wf::WavFile::outInitialize(std::string filename) {

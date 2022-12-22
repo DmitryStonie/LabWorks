@@ -219,3 +219,4 @@ void cv::SoundProcessor::run(std::vector<std::string>& fileNames) {
 		throw errCode;
 	}
 }
+

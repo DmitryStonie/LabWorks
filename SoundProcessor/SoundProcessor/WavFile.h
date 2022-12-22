@@ -5,16 +5,22 @@
 #include <fstream>
 
 namespace wavfile {
-	const int DEFAULT_HEADER_SIZE = 44;
-	const int DEFAULT_RATE = 44100;
-	const int DEFAULT_CHANNELS = 1;
-	const int DEFAULT_BITS_PER_SAMPLE = 16;
+	const char RIFF_CHAIN[4] = { 'R', 'I', 'F', 'F' };
+	const int DEFAULT_CHUNK_SIZE = 36;
+	const char WAVE_FORMAT[4] = { 'W', 'A', 'V', 'E' };
+	const char FMT_SUBCHAIN[4] = { 'f', 'm', 't', ' ' };
 	const int PCM_SUBCHUNK_SIZE = 16;
 	const int PCM_FORMAT = 1;
-	const char RIFF_CHAIN[] = "RIFF";
-	const char WAVE_FORMAT[] = "WAVE";
-	const char FMT_SUBCHAIN[] = "fmt ";
-	const char DATA_SUBCHAIN[] = "data";
+	const int DEFAULT_CHANNELS = 1;
+	const int DEFAULT_RATE = 44100;
+	const int BYTES_PER_SECOND = 88200;
+	const int DEFAULT_BLOCK_ALIGN = 2;
+	const int DEFAULT_BITS_PER_SAMPLE = 16;
+	const char DATA_SUBCHAIN[4] = { 'd', 'a', 't', 'a' };
+	const int DEFAULT_DATA_SIZE = 0;
+
+
+	const int DEFAULT_HEADER_SIZE = 44;
 	const bool CORRECT = 0;
 	const bool INCORRECT = 1;
 	const bool EQUAL = 0;
@@ -29,10 +35,8 @@ namespace wavfile {
 	const bool OPENED = 0;
 	const bool CLOSED = 1;
 	const int ZERO = 0;
-	const int BYTES_PER_SECOND = 88200;
 	class WavFile {
 		//header
-		bool is_correct;
 		char chunkId[4];				//for "RIFF" symbols
 		unsigned long chunkSize;		//filesize - 8
 		char format[4];					//for "WAVE" symbols
@@ -52,11 +56,12 @@ namespace wavfile {
 		unsigned long fileSize;
 		unsigned long headerSize;
 		std::fstream fileStream;
+		bool is_correct;
 
 		const bool isHeaderCorrect();
 		const bool returnHeaderCorrectness();
 		void copyStr(char* destination, const char* source, const int source_start, const int count);
-		int compareId(const char* id1, const char* id2);
+		int compareId(char* id1, const  char* id2);
 		int readDataChunkId(char* array, int pos, int array_size);
 		const char* num_str(unsigned long number);
 		const char* num_str(unsigned short number);
@@ -69,7 +74,6 @@ namespace wavfile {
 		int returnDatasize();
 		int isOpen();
 		void outInitialize(std::string filename);
-		unsigned long returnDataPos();
 		void setDefaultHeader();
 		unsigned long returnHeadersize();
 		
