@@ -46,7 +46,7 @@ void ca::Tick::doAction(gamefield::GameField field, console::Console output, int
 		output.writeError(cs::WRONG_TICKS);
 		return;
 	}
-	field. iterate(ticks);
+	field.iterate(ticks);
 }
 void ca::Default::doAction(gamefield::GameField field, console::Console output, int &endFlag, std::string argument) {
 	output.writeError(cs::WRONG_OPTION);

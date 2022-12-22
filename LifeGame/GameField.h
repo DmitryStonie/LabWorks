@@ -45,7 +45,6 @@ namespace gamefield {
 	//iterate mode
 	const int SILENCE = 1;
 	const int NO_SILENCE = 0;
-	const int NO_SILENCE = 0;
 
 	//gamemodes
 	const int ONLINE_MODE = 1;

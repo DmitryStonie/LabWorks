@@ -103,7 +103,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>C:\Users\Dmitry\source\repos\DmitryStonie\LabWorks\packages\boost_program_options-vc143.1.80.0\lib\native;C:\Users\Dmitry\source\repos\DmitryStonie\LabWorks\LifeGame\x64\Debug;C:\Users\Dmitry\source\repos\DmitryStonie\LabWorks\LifeGame</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GameField.obj;Console.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GameField.obj;Console.obj;ConsoleAction.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

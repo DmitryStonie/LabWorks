@@ -1,12 +1,10 @@
 #include <fstream>
 #include "GameField.h"
 #include "Console.h"
-#include "ConsoleAction.h"
 
 namespace po = boost::program_options;
 namespace cs = console;
 namespace gf = gamefield;
-namespace ca = consoleaction;
 
 gf::GameField::GameField() {
 	width = DEFAULT_WIDTH;
@@ -105,7 +103,7 @@ void gf::GameField::input_header(std::ifstream& inf, GameField& map) {
 	}
 }
 
-int gf::GameField::input_rules(std::string source, GameField &map) {
+int gf::GameField::input_rules(std::string source, GameField& map) {
 	const char LOWEST_RULE_NUMBER = '0';
 	const char HIGHEST_RULE_NUMBER = '8';
 
@@ -118,7 +116,7 @@ int gf::GameField::input_rules(std::string source, GameField &map) {
 		if (source[pos] >= LOWEST_RULE_NUMBER && source[pos] <= HIGHEST_RULE_NUMBER) {
 			map.birth_rule.insert(source[pos] - CHAR_TO_NUM_COEF);
 		}
-		else if(source[pos] == SLASH) {
+		else if (source[pos] == SLASH) {
 			pos++;
 			break;
 		}
@@ -238,15 +236,15 @@ void gf::GameField::iterate(int count, int silence) {
 	cs::Console show_map;
 	iterations += count;
 	if (silence == NO_SILENCE) {
-	std::cout << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
-	for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
-		std::cout << (char)(*birth_num + CHAR_TO_NUM_COEF);
-	}
-	std::cout << SLASH << SURVIVE_LETTER;
-	for (std::set<int>::iterator survive_num = survive_rule.begin(); survive_num != survive_rule.end(); ++survive_num) {
-		std::cout << (char)(*survive_num + CHAR_TO_NUM_COEF);
-	}
-	std::cout << '\n' << iterations << '\n';
+		std::cout << universe_name << '\n' << RULES_SPEC << BIRTH_LETTER;
+		for (std::set<int>::iterator birth_num = birth_rule.begin(); birth_num != birth_rule.end(); ++birth_num) {
+			std::cout << (char)(*birth_num + CHAR_TO_NUM_COEF);
+		}
+		std::cout << SLASH << SURVIVE_LETTER;
+		for (std::set<int>::iterator survive_num = survive_rule.begin(); survive_num != survive_rule.end(); ++survive_num) {
+			std::cout << (char)(*survive_num + CHAR_TO_NUM_COEF);
+		}
+		std::cout << '\n' << iterations << '\n';
 		show_map.printMap(return_map(), height, width);
 	}
 	for (int i = 0; i < count; i++) {
@@ -264,7 +262,7 @@ void gf::GameField::dump(std::string output_file) {
 	cs::Console errout;
 	if (fout.is_open() == 0) {
 		errout.writeError(cs::CANNOT_OPEN_FILE);
-		errout.writeMessage("Name of file: "+output_file + "\n");
+		errout.writeMessage("Name of file:" + output_file);
 		fout.close();
 		return;
 	}
@@ -284,7 +282,6 @@ void gf::GameField::dump(std::string output_file) {
 			}
 		}
 	}
-	errout.writeMessage(gf::SUCCESFUL_DUMP_MESSAGE);
 	fout << height - 1 << ' ' << width - 1 << '\n';	//for loseless size
 	fout.close();
 }
@@ -296,12 +293,40 @@ void gf::GameField::run() {
 	}
 	cs::Console coutput;
 	std::string argument;
-	ca::ConsoleAction init_act;
-	std::vector<ca::ConsoleAction*> actions = init_act.initialize_array();
-	int returned_code = 0, end_of_programm = 0;
-	for (;end_of_programm != END_OF_PROGRAMM;) {
+	int returned_code = 0, ticks = 0, end_of_programm = 0;
+	for (; end_of_programm != END_OF_PROGRAMM;) {
 		returned_code = coutput.read_command(argument);
-		actions[returned_code]->doAction(*this, coutput, end_of_programm, argument);
+		switch (returned_code) {
+		case cs::DUMP:
+			if (argument.length() == 0) {
+				coutput.writeError(cs::NO_FILENAME);
+				break;
+			}
+			(*this).dump(argument);
+			coutput.writeMessage(SUCCESFUL_DUMP_MESSAGE);
+			break;
+		case cs::HELP:
+			coutput.writeMessage(HELP_MESSAGE);
+			break;
+		case cs::EXIT:
+			coutput.writeMessage(EXIT_MESSAGE);
+			end_of_programm = END_OF_PROGRAMM;
+			break;
+		case cs::TICK:
+			if (argument.length() == 0) {
+				coutput.writeError(cs::NO_TICKS);
+				break;
+			}
+			ticks = std::stoi(argument);
+			if (ticks <= 0) {
+				coutput.writeError(cs::WRONG_TICKS);
+				break;
+			}
+			iterate(ticks);
+			break;
+		default:
+			coutput.writeError(cs::WRONG_OPTION);
+		}
 	}
 }
 
@@ -353,7 +378,8 @@ void gf::ArgsContainer::gameFieldInitialization(GameField& map) {
 	map.output_file = buf_field.output_file;
 	if (buf_field.output_file != DEFAULT_OUTPUT_FILENAME && buf_field.input_file != DEFAULT_INPUT_FILENAME && buf_field.iterations != DEFAULT_ITERATIONS) {
 		tmp.mode = OFFLINE_MODE;
-	} else if (buf_field.input_file != DEFAULT_INPUT_FILENAME) {
+	}
+	else if (buf_field.input_file != DEFAULT_INPUT_FILENAME) {
 		tmp.mode = ONLINE_MODE;
 	}
 	else {
