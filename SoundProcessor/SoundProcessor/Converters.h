@@ -78,15 +78,15 @@ namespace converter {
 		std::vector<unsigned short> input2;
 		std::vector<unsigned short> output;
 		int convFind(std::string& convToFind, std::vector<std::string>& converterNames);
-		void init_files(std::vector<std::string>& filenames);
+		void init_files(std::vector<std::vector<std::string>>& filenames);
 		void init_converters(std::vector<std::vector<std::string>>& config);
 		int countMaxSize();
 		int biggestFileInd();
 	;	public:
 		SoundProcessor();
 		~SoundProcessor();
-		void initialize(std::vector<std::vector<std::string>>& config, std::vector<std::string>& filenames);
-		void run(std::vector<std::string>& fileNames);
+		void initialize(std::vector<std::vector<std::string>>& config, std::vector<std::vector<std::string>>& filenames);
+		void run();
 
 	};
 }

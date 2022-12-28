@@ -12,7 +12,9 @@ namespace errors {
 		WRITE_ERROR = 3,
 		READ_ERROR = 4,
 		INVALID_COMMAND_LINE_ARGUMENTS = 5,
-
+		MULTIPLE_INPUT_FILES = 6,
+		MULTIPLE_CONFIG_FILES = 7,
+		INVALID_CONFIG_FILE = 8
 	};
 	class ErrorOutput {
 		std::map<int, const std::string> errors = {
@@ -22,6 +24,9 @@ namespace errors {
 			{WRITE_ERROR,"Error: Cannot write data to file\n"},
 			{READ_ERROR,"Error: Cannot read data to file\n"},
 			{INVALID_COMMAND_LINE_ARGUMENTS, "Error: Invalid Command line arguments\n"},
+			{MULTIPLE_INPUT_FILES, "Error: some files are used more than 1 time\n"},
+			{MULTIPLE_CONFIG_FILES, "Error: used more than 1 config files\n"},
+			{INVALID_CONFIG_FILE, "Error: config file has wrong data\n"}
 		};
 	public:
 		ErrorOutput();

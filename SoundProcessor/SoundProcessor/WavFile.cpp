@@ -229,3 +229,17 @@ void wf::WavFile::writeBytes(char* destination, const char* source, int source_s
 unsigned long wf::WavFile::returnHeadersize() {
 	return headerSize;
 }
+
+char* wf::WavFile::returnHeader() {
+	const int BUF_SIZE = 1000;
+	char buf_char[BUF_SIZE];
+	fileStream.seekg(0);
+	fileStream.read(buf_char, BUF_SIZE);
+	return buf_char;
+}
+
+void wf::WavFile::writeHeader(char* header, int headerSize) {
+	fileStream.seekg(0);
+	fileStream.write(header, headerSize);
+	if (fileStream.bad()) throw es::WRITE_ERROR;
+}

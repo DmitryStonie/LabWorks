@@ -1,6 +1,6 @@
 #include "ConfigParser.h"
 #include "Errors.h"
-
+#include <set>
 
 namespace cp = configparser;
 
@@ -32,21 +32,23 @@ cp::ConfigParser::~ConfigParser() {
 
 }
 
-void cp::ConfigParser::initialize(std::string filename, std::vector<std::string> converters) {
+void cp::ConfigParser::initialize(std::vector<std::string> filename, std::set<std::string> converters) {
 	const char LATTICE_SYMBOL = '#';
-	std::ifstream input(filename, std::ios_base::in);
+	std::ifstream input(filename[0], std::ios_base::in);
 	if (!(input.is_open())) {
 		throw errors::CANNOT_OPEN_FILE;
 	}
-	std::string line;//try catch
+	std::string line, name;
 	for (; !(input.eof());) {
 		std::getline(input, line, '\n');
-		//if (line[0] == LATTICE_SYMBOL); LATTICE SYMBOL and other symbols is allowed
-		if (find_converter(line, converters) == FOUND) {
+		name = line.substr(0, line.find(' '));
+		if (converters.find(name) == converters.end() && line[0] != LATTICE_SYMBOL) {
+			throw errors::INVALID_CONFIG_FILE;
+		}
+		else if (converters.find(name) != converters.end()) {
 			write_arguments(line);
 		}
 	}
-
 }
 
 std::vector<std::vector<std::string>> cp::ConfigParser::return_config() {

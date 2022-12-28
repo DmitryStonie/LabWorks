@@ -5,6 +5,7 @@
 namespace ac = argscontainer;
 
 ac::ArgsContainer::ArgsContainer() {
+	filenames.resize(3);
 	filenames[CONFIG_FILES].push_back(DEFAULT_CONFIG);
 	filenames[INPUT_FILES].push_back(DEFAULT_INPUT);
 	filenames[INPUT_FILES].push_back(DEFAULT_INPUT2);
@@ -16,7 +17,7 @@ ac::ArgsContainer::~ArgsContainer() {
 }
 
 std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int argc, char** argv) {
-	setDefaultArgs();
+	//setDefaultArgs();
 	po::options_description hidden;
 	hidden.add_options()
 		("outputFile", po::value<std::vector<std::string>>(&filenames[OUTPUT_FILES]), "Output file")
@@ -39,9 +40,19 @@ std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int arg
 		if (var_map.count("-h")) { 
 			std::cout << Allowed << '\n';
 		}
+		std::set<std::string> checkRepeats(filenames[INPUT_FILES].begin(), filenames[INPUT_FILES].end());
+		if (checkRepeats.size() != filenames[INPUT_FILES].size()) {
+			throw errors::MULTIPLE_INPUT_FILES;
+		}
+		if (filenames[CONFIG_FILES].size() > NUM_OF_CONFIG_FILES) {
+			throw errors::MULTIPLE_CONFIG_FILES;
+		}
 	}
 	catch (const po::error& e) {
 		throw errors::INVALID_COMMAND_LINE_ARGUMENTS;
+	}
+	catch (errors::errorCodes errCode) {
+		throw errCode;
 	}
 	return filenames;
 }

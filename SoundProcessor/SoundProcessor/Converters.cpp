@@ -1,11 +1,13 @@
 #include "Converters.h"
 #include "WavFile.h"
 #include "Errors.h"
+#include "ArgsContainer.h"
 #include <limits>
 #include <algorithm>
 
 namespace cv = converter;
 namespace wf = wavfile;
+namespace ac = argscontainer;
 
 void cv::Mix::convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int stream_start, int stream_end) {
 	int start_index = 0, end_index = 0, iter_count = 0;
@@ -120,7 +122,7 @@ cv::SoundProcessor::~SoundProcessor() {
 
 }
 
-void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>>& config, std::vector<std::string>& filenames) {
+void cv::SoundProcessor::initialize(std::vector<std::vector<std::string>>& config, std::vector<std::vector<std::string>>& filenames) {
 	try {
 		init_files(filenames);
 		init_converters(config);
@@ -140,18 +142,19 @@ int cv::SoundProcessor::convFind(std::string& convToFind, std::vector<std::strin
 	return converterNames.size() + 1;
 }
 
-void cv::SoundProcessor::init_files(std::vector<std::string>& filenames) {
+void cv::SoundProcessor::init_files(std::vector<std::vector<std::string>>& filenames) {
+	int filesNum = filenames[ac::INPUT_FILES].size() + filenames[ac::OUTPUT_FILES].size();
 	try {
-		for (int i = 0; i < filenames.size() - 2; i++) {
+		for (int i = 0; i < filesNum - 1; i++) {
 			files.push_back(new wavfile::WavFile);
-			files[i]->initialize(filenames[i]);
+			files[i]->initialize(filenames[ac::INPUT_FILES][i]);
 			if (files[i]->isOpen() == NOT_OPENED) {
 				delete files[i];
 				files[i] == NULL;
 			}
 		}
 		files.push_back(new wavfile::WavFile);
-		files[filenames.size() - 2]->outInitialize(filenames[filenames.size() - 2]);
+		files[filesNum - 1]->outInitialize(filenames[ac::OUTPUT_FILES][0]);
 		files[files.size() - 1]->setDefaultHeader();
 	}
 	catch (int errCode) {
@@ -188,16 +191,15 @@ int cv::SoundProcessor::countMaxSize() {
 	return tmpSize;
 }
 
-void cv::SoundProcessor::run(std::vector<std::string>& fileNames) {
+void cv::SoundProcessor::run() {
 	errors::errorCodes errout;
 	unsigned long readPos = 0;
 	unsigned long writePos = 0;
 	unsigned long riddenBytes;
-	int outputFileSize = (*this).countMaxSize();
-	files[files.size() - 1]->changeSize(wf::DEFAULT_HEADER_SIZE + outputFileSize);
+	files[files.size() - 1]->changeSize(files[0]->returnHeadersize() + files[0]->returnDatasize());
 	try {
-		files[files.size() - 1]->writeHeader();
-		writePos += files[files.size() - 1]->returnHeadersize();
+		files[files.size() - 1]->writeHeader(files[0]->returnHeader(), files[0]->returnHeadersize());
+		writePos = files[0]->returnHeadersize();
 		int secondFileIndex;
 		for (;;) {
 			riddenBytes = files[0]->readData(input1, readPos);

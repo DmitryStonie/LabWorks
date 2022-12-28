@@ -76,9 +76,11 @@ namespace wavfile {
 		void outInitialize(std::string filename);
 		void setDefaultHeader();
 		unsigned long returnHeadersize();
+		char* returnHeader();
 
 		void readHeader();
 		void writeHeader();
+		void writeHeader(char* header, int headerSize);
 		int readData(std::vector<unsigned short> data, int readIndex);
 		void writeData(std::vector<unsigned short> data, int writeIndex, int bytesCount);
 	};

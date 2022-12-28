@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <set>
 
 namespace configparser {
 	enum findcond {
@@ -16,7 +17,7 @@ namespace configparser {
 	public:
 		ConfigParser();
 		~ConfigParser();
-		void initialize(std::string filename, std::vector<std::string> converters);
+		void initialize(std::vector<std::string> filename, std::set<std::string> converters);
 		std::vector<std::vector<std::string>> return_config();
 	};
 }

@@ -7,5 +7,5 @@ errors::ErrorOutput::~ErrorOutput() {
 
 }
 void errors::ErrorOutput::writeError(int errorCode) {
-	std::cerr << errors[errorCode] << std::endl;
+	std::cerr << errors[errorCode];
 }

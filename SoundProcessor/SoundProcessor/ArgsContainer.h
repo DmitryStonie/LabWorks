@@ -13,6 +13,7 @@ namespace argscontainer {
 		INPUT_FILES = 1,
 		OUTPUT_FILES = 2
 	};
+	const int NUM_OF_CONFIG_FILES = 1;
 	const int CONFIG_POS = 0;
 	const int OUTPUT_POS = 0;
 	class ArgsContainer {
