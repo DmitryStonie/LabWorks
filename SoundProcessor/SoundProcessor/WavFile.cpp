@@ -230,12 +230,10 @@ unsigned long wf::WavFile::returnHeadersize() {
 	return headerSize;
 }
 
-char* wf::WavFile::returnHeader() {
+void wf::WavFile::returnHeader(char* buf_char) {
 	const int BUF_SIZE = 1000;
-	char buf_char[BUF_SIZE];
 	fileStream.seekg(0);
 	fileStream.read(buf_char, BUF_SIZE);
-	return buf_char;
 }
 
 void wf::WavFile::writeHeader(char* header, int headerSize) {

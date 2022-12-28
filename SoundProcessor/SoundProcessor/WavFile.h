@@ -76,7 +76,7 @@ namespace wavfile {
 		void outInitialize(std::string filename);
 		void setDefaultHeader();
 		unsigned long returnHeadersize();
-		char* returnHeader();
+		void returnHeader(char* buf_char);
 
 		void readHeader();
 		void writeHeader();

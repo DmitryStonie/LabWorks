@@ -196,9 +196,12 @@ void cv::SoundProcessor::run() {
 	unsigned long readPos = 0;
 	unsigned long writePos = 0;
 	unsigned long riddenBytes;
+	const int BUF_SIZE = 1000;
+	char buf_char[BUF_SIZE];
 	files[files.size() - 1]->changeSize(files[0]->returnHeadersize() + files[0]->returnDatasize());
 	try {
-		files[files.size() - 1]->writeHeader(files[0]->returnHeader(), files[0]->returnHeadersize());
+		files[0]->returnHeader(buf_char);
+		files[files.size() - 1]->writeHeader(buf_char, files[0]->returnHeadersize());
 		writePos = files[0]->returnHeadersize();
 		int secondFileIndex;
 		for (;;) {
