@@ -1,6 +1,5 @@
 #include <iostream>
 #include "ArgsContainer.h"
-#include "Converters.h"
 #include "Errors.h"
 
 namespace ac = argscontainer;
@@ -17,8 +16,7 @@ ac::ArgsContainer::~ArgsContainer() {
 
 }
 
-std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int argc, char** argv) {
-	//setDefaultArgs();
+std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int argc, char** argv, const std::string helpMessage) {
 	po::options_description hidden;
 	hidden.add_options()
 		("outputFile", po::value<std::vector<std::string>>(&filenames[OUTPUT_FILES]), "Output file")
@@ -39,8 +37,7 @@ std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int arg
 		po::store(po::command_line_parser(argc, argv).options(descriptor).positional(pos_descriptor).run(), var_map);
 		po::notify(var_map);
 		if (var_map.count("-h")) { 
-			std::cout << Allowed << '\n';
-			converter::printInformation();
+			std::cout << Allowed << '\n' << helpMessage;
 		}
 		std::set<std::string> checkRepeats(filenames[INPUT_FILES].begin(), filenames[INPUT_FILES].end());
 		if (checkRepeats.size() != filenames[INPUT_FILES].size()) {

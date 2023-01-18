@@ -1,18 +1,19 @@
 #pragma once
 #include <vector>
+#include <set>
 #include <string>
 #include <limits>
 #include "WavFile.h"
 
 namespace converter {
-	const std::string MIX_STR = "mix";
-	const std::string MUTE_STR = "mute";
-	const std::string CHANGEBITS_STR = "changebits";
+	const std::vector<std::string> CONVERTER_NAMES = { "mix", "mute", "changebeats" };
+	const std::set<std::string> CONVERTER_NAMES_SET = { "mix", "mute", "changebeats" };
 	const int MAX_DATA_SIZE = UINT32_MAX;
 	const int NO_SECOND_STREAM = -1;
 	const int NOT_OPENED = 1;
 	const int ZERO = 0;
 	const int FIRST_FILE = 1;
+	const int PARAMETERS_NUM = 3;
 	enum conv_codes {
 		MIX_CONVERTER = 0,
 		MUTE_CONVERTER = 1,
@@ -31,15 +32,16 @@ namespace converter {
 		int interval_end;
 		int secondStreamNumber;
 	public:
+		Converter();
 		virtual void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
 		virtual void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int secondInputArg();
 		virtual int calculateReadPos(const int readPos, int bytesPerSecond);
 		virtual ~Converter() {}
-		virtual void printInfo();
+		virtual std::string returnInfo();
 	};
 
-	void printInformation();
+	const std::string returnHelpMessage();
 
 	class Mix : public Converter {
 	private:
@@ -48,7 +50,7 @@ namespace converter {
 		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
 		void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int calculateReadPos(const int readPos, int bytesPerSecond);
-		void printInfo();
+		std::string returnInfo();
 	};
 
 	class Mute : public Converter {
@@ -58,17 +60,17 @@ namespace converter {
 		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
 		void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int calculateReadPos(const int readPos, int bytesPerSecond);
-		void printInfo();
+		std::string returnInfo();
 	};
 
-	class ChangeBits : public Converter {
+	class ChangeBeats : public Converter {
 	private:
 		void countBorders(int& start_index, int& end_index, int stream_start, int stream_end, int buf_size, int elem_size);
 	public:
 		void convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int interval_start, int interval_end);
 		void initialize(std::vector<std::string>& parameters, unsigned long bytesPerSecond);
 		int calculateReadPos(const int readPos, int bytesPerSecond);
-		void printInfo();
+		std::string returnInfo();
 	};
 
 	class ConverterFactory {
@@ -87,7 +89,7 @@ namespace converter {
 
 	};
 
-	class ChangeBitsFactory : public ConverterFactory {
+	class ChangeBeatsFactory : public ConverterFactory {
 		Converter* factoryMethod();	
 	};
 
@@ -97,11 +99,9 @@ namespace converter {
 		std::vector<unsigned short> input1;
 		std::vector<unsigned short> input2;
 		std::vector<unsigned short> output;
-		int convFind(std::string& convToFind, std::vector<std::string>& converterNames);
+		int convFind(std::string& convToFind);
 		void init_files(std::vector<std::vector<std::string>>& filenames);
 		void init_converters(std::vector<std::vector<std::string>>& config);
-		//int countMaxSize();
-		//int biggestFileInd();
 	;	public:
 		SoundProcessor();
 		~SoundProcessor();

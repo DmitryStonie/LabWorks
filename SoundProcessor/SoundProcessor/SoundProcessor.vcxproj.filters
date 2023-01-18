@@ -63,5 +63,8 @@
     <Text Include="defconfig.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="wrongconfig.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

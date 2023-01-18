@@ -6,6 +6,9 @@
 #include <set>
 
 namespace configparser {
+	const char LATTICE_SYMBOL = '#';
+	const char LINE_DELIMETER = '\n';
+	const char ARG_DELIMETER = ' ';
 	enum findcond {
 		FOUND = 0,
 		NOT_FOUND = 1

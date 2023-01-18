@@ -5,7 +5,6 @@
 #include "Converters.h"
 #include "Errors.h"
 
-namespace wf = wavfile;
 namespace cp = configparser;
 namespace ac = argscontainer;
 namespace cv = converter;
@@ -17,10 +16,9 @@ int main(int argc, char ** argv)
     try {
         ac::ArgsContainer argcount;
         std::vector<std::vector<std::string>> filenames;
-        filenames = argcount.returnFilenames(argc, argv);
-        std::set<std::string> converterNames = { cv::MIX_STR, cv::MUTE_STR, cv::CHANGEBITS_STR };
+        filenames = argcount.returnFilenames(argc, argv, cv::returnHelpMessage());
         cp::ConfigParser configuration;
-        configuration.initialize(filenames[ac::CONFIG_FILES], converterNames);
+        configuration.initialize(filenames[ac::CONFIG_FILES], cv::CONVERTER_NAMES_SET);
         std::vector<std::vector<std::string>> config = configuration.return_config();
         cv::SoundProcessor soundChanger;
         soundChanger.initialize(config, filenames);
@@ -28,6 +26,7 @@ int main(int argc, char ** argv)
     }
     catch (es::errorCodes errCode) {
         errout.writeError(errCode);
+        return errCode;
     }
     return 0;
 }

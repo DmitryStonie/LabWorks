@@ -21,6 +21,6 @@ namespace argscontainer {
 	public:
 		ArgsContainer();
 		~ArgsContainer();
-		std::vector<std::vector<std::string>> returnFilenames(int argc, char** argv);
+		std::vector<std::vector<std::string>> returnFilenames(int argc, char** argv, const std::string helpMessage);
 	};
 }

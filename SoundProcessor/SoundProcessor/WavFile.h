@@ -5,6 +5,7 @@
 #include <fstream>
 
 namespace wavfile {
+	const int RIFF_NAME_SIZE = 8;
 	const char RIFF_CHAIN[4] = { 'R', 'I', 'F', 'F' };
 	const int DEFAULT_CHUNK_SIZE = 36;
 	const char WAVE_FORMAT[4] = { 'W', 'A', 'V', 'E' };
@@ -18,8 +19,6 @@ namespace wavfile {
 	const int DEFAULT_BITS_PER_SAMPLE = 16;
 	const char DATA_SUBCHAIN[4] = { 'd', 'a', 't', 'a' };
 	const int DEFAULT_DATA_SIZE = 0;
-
-
 	const int DEFAULT_HEADER_SIZE = 44;
 	const bool CORRECT = 0;
 	const bool INCORRECT = 1;
@@ -35,6 +34,8 @@ namespace wavfile {
 	const bool OPENED = 0;
 	const bool CLOSED = 1;
 	const int ZERO = 0;
+	const int BUF_SIZE = 1000;
+	const int CHUNK_NAME_SIZE = 4;
 	class WavFile {
 		//header
 		char chunkId[4];				//for "RIFF" symbols
@@ -58,6 +59,7 @@ namespace wavfile {
 		std::fstream fileStream;
 		bool is_correct;
 
+		void setDefaultHeader();
 		const bool isHeaderCorrect();
 		const bool returnHeaderCorrectness();
 		void copyStr(char* destination, const char* source, const int source_start, const int count);
@@ -88,12 +90,6 @@ namespace wavfile {
 		void changeSize(unsigned long filesize);
 		int returnDatasize();
 		int isOpen();
-
-		//unused
-		//void setDefaultHeader();
-		//void writeHeader();
-		//void writeHeader(char* header, int headerSize);
-		//int readData(std::vector<unsigned short>& data, int readIndex);
 
 	};
 

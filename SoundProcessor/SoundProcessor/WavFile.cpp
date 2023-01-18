@@ -1,11 +1,30 @@
 #include "WavFile.h"
 #include "Errors.h"
-#include <fstream>
 
 namespace wf = wavfile;
 namespace es = errors;
 
 ////////////////////////////////////////////////////////private functions///////////////////////////////////////////////////
+void wf::WavFile::setDefaultHeader() {
+	writeBytes(chunkId, wf::RIFF_CHAIN, 4);
+	chunkSize = DEFAULT_CHUNK_SIZE;	//data part is empty
+	writeBytes(format, wf::WAVE_FORMAT, 4);
+	writeBytes(subchunk1Id, wf::FMT_SUBCHAIN, 4);
+	subchunk1Size = wf::PCM_SUBCHUNK_SIZE;	//for PCM
+	audioFormat = wf::PCM_FORMAT;	//for PCM
+	numChannels = wf::DEFAULT_CHANNELS;
+	sampleRate = wf::DEFAULT_RATE;
+	bitsPerSample = wf::DEFAULT_BITS_PER_SAMPLE;
+	byteRate = wf::BYTES_PER_SECOND;	// 1 byte = 8 bits
+	blockAlign = DEFAULT_BLOCK_ALIGN;
+	writeBytes(subchunk2Id, wf::DATA_SUBCHAIN, 4);
+	subchunk2Size = DEFAULT_DATA_SIZE;	//data part is empty
+	fileSize = DEFAULT_HEADER_SIZE;
+	firstDataIndex = fileSize - subchunk2Size;
+	open_status = CLOSED;
+	headerSize = DEFAULT_HEADER_SIZE;
+	is_correct = wf::CORRECT;
+}
 
 const bool wf::WavFile::isHeaderCorrect() {
 	if (compareId(chunkId, wf::RIFF_CHAIN) == wf::EQUAL && compareId(format, wf::WAVE_FORMAT) == wf::EQUAL
@@ -30,37 +49,34 @@ void wf::WavFile::copyStr(char* destination, const char* source, const int sourc
 }
 
 int wf::WavFile::compareId(char* id1, const  char* id2) {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < CHUNK_NAME_SIZE; i++) {
 		if (id1[i] != id2[i]) return UNEQUAL;
 	}
 	return EQUAL;
 }
 
 int wf::WavFile::readDataChunkId(char* array, int pos, int array_size) {
-	const int chunkNameSize = 4;
 	while (pos != array_size - 1) {
-		if (compareId(array + pos, wf::DATA_SUBCHAIN) == EQUAL) return pos + chunkNameSize;
+		if (compareId(array + pos, wf::DATA_SUBCHAIN) == EQUAL) return pos + CHUNK_NAME_SIZE;
 		pos++;
 	}
 	return NO_DATA;
 }
 
 const char* wf::WavFile::num_str(unsigned long number) {
-	static const unsigned long CHAR_SIZE = 256;
 	static char tmp_str[sizeof(number)];
 	for (int i = 1; i <= sizeof(number); i++) {
-		tmp_str[sizeof(number) - i] = (char)(number % CHAR_SIZE);
-		number /= CHAR_SIZE;
+		tmp_str[sizeof(number) - i] = (char)(number % sizeof(char));
+		number /= sizeof(char);
 	}
 	return tmp_str;
 }
 
 const char* wf::WavFile::num_str(unsigned short number) {
-	static const unsigned long CHAR_SIZE = 256;
 	static char tmp_str[sizeof(number)];
 	for (int i = 1; i <= sizeof(number); i++) {
-		tmp_str[sizeof(number) - i] = (char)(number % CHAR_SIZE);
-		number /= CHAR_SIZE;
+		tmp_str[sizeof(number) - i] = (char)(number % sizeof(char));
+		number /= sizeof(char);
 	}
 	return tmp_str;
 }
@@ -73,7 +89,7 @@ void wf::WavFile::writeBytes(char* destination, const char* source, int source_s
 
 ////////////////////////////////////////////////////////public functions///////////////////////////////////////////////////
 wf::WavFile::WavFile() {
-	//(*this).setDefaultHeader();
+	(*this).setDefaultHeader();
 }
 
 wf::WavFile::~WavFile() {
@@ -90,7 +106,7 @@ void wf::WavFile::initialize(std::string filename) {
 		open_status = OPENED;
 	}
 	catch (int errCode) {
-		//setDefaultHeader();
+		setDefaultHeader();
 		open_status = CLOSED;
 		throw errCode;
 	}
@@ -101,12 +117,11 @@ void wf::WavFile::outInitialize(std::string filename) {
 	if (!(fileStream.is_open())) {
 		throw es::CANNOT_OPEN_FILE;
 	}
-	//setDefaultHeader();
+	setDefaultHeader();
 }
 
 void wf::WavFile::readHeader() {
 	const int NOT_OPEN = 0;
-	const int BUF_SIZE = 1000;
 	char buf_char[BUF_SIZE];
 	int subchunk2SizeIndex;
 	if (!(fileStream.read(buf_char, BUF_SIZE))) {
@@ -146,7 +161,6 @@ unsigned long wf::WavFile::returnHeaderSize() {
 }
 
 void wf::WavFile::returnHeader(char* buf_char) {
-	const int BUF_SIZE = 1000;
 	fileStream.seekg(0);
 	fileStream.read(buf_char, BUF_SIZE);
 }
@@ -161,7 +175,7 @@ int wf::WavFile::readData(std::vector<unsigned short>& data, int readIndex, int 
 	else {
 		charToRead = bytesCount;
 	}
-	int shortCount = (bytesCount + 1) / 2;
+	int shortCount = (bytesCount + 1) / sizeof(unsigned short);
 	unsigned short* bufShort = new unsigned short[shortCount];
 	char* bufChar = new char[charToRead];
 	fileStream.seekg(readIndex);
@@ -204,14 +218,10 @@ int wf::WavFile::readData(std::vector<char>& data, int readIndex, int bytesCount
 
 void wf::WavFile::writeData(std::vector<unsigned short>& data, int writeIndex, int bytesCount) {
 	char* bufChar = new char[bytesCount];
-	int shortCount = (bytesCount + 1) / 2;
-	//unsigned short test[5] = {1, 2, 3, 4, 5};
+	int shortCount = (bytesCount + 1) / sizeof(unsigned short);
 	std::memcpy(bufChar, data.data(), bytesCount);
-	//for (int i = 0; i < shortCount; i++) {
-	//	sprintf(bufChar + i * 2, "%hu", data[i]);	//maybe not work
-	//}
 	fileStream.seekg(writeIndex);
-	fileStream.write(bufChar, shortCount * 2);
+	fileStream.write(bufChar, shortCount * sizeof(unsigned short));
 	delete[] bufChar;
 	if (fileStream.bad()) throw es::WRITE_ERROR;
 }
@@ -223,7 +233,7 @@ void wf::WavFile::writeData(std::vector<char>& data, int writeIndex, int bytesCo
 }
 
 void wf::WavFile::changeSize(unsigned long filesize) {
-	chunkSize = filesize - 8;
+	chunkSize = filesize - RIFF_NAME_SIZE;
 	subchunk2Size = filesize - DEFAULT_HEADER_SIZE;
 	fileSize = filesize;
 }
@@ -235,76 +245,3 @@ int wf::WavFile::returnDatasize() {
 int wf::WavFile::isOpen() {
 	return open_status;
 }
-
-//void wf::WavFile::setDefaultHeader() {
-//	writeBytes(chunkId, wf::RIFF_CHAIN, 4);
-//	chunkSize = DEFAULT_CHUNK_SIZE;	//data part is empty
-//	writeBytes(format, wf::WAVE_FORMAT, 4);
-//	writeBytes(subchunk1Id, wf::FMT_SUBCHAIN, 4);
-//	subchunk1Size = wf::PCM_SUBCHUNK_SIZE;	//for PCM
-//	audioFormat = wf::PCM_FORMAT;	//for PCM
-//	numChannels = wf::DEFAULT_CHANNELS;
-//	sampleRate = wf::DEFAULT_RATE;
-//	bitsPerSample = wf::DEFAULT_BITS_PER_SAMPLE;
-//	byteRate = wf::BYTES_PER_SECOND;	// 1 byte = 8 bits
-//	blockAlign = DEFAULT_BLOCK_ALIGN;
-//	writeBytes(subchunk2Id, wf::DATA_SUBCHAIN, 4);
-//	subchunk2Size = DEFAULT_DATA_SIZE;	//data part is empty
-//	fileSize = DEFAULT_HEADER_SIZE;
-//	firstDataIndex = fileSize - subchunk2Size;
-//	open_status = CLOSED;
-//	headerSize = DEFAULT_HEADER_SIZE;
-//	is_correct = wf::CORRECT;
-//}
-
-//void wf::WavFile::writeHeader() {
-//	char out[DEFAULT_HEADER_SIZE];
-//	writeBytes(out, chunkId, 4);
-//	writeBytes(out + 4, num_str(chunkSize), 4);
-//	writeBytes(out + 8, format, 4);
-//	writeBytes(out + 12, subchunk1Id, 4);
-//	writeBytes(out + 16, num_str(subchunk1Size), 4);
-//	writeBytes(out + 20, num_str(audioFormat), 2);
-//	writeBytes(out + 22, num_str(numChannels), 2);
-//	writeBytes(out + 24, num_str(sampleRate), 4);
-//	writeBytes(out + 28, num_str(byteRate), 4);
-//	writeBytes(out + 32, num_str(blockAlign), 2);
-//	writeBytes(out + 34, num_str(bitsPerSample), 2);
-//	writeBytes(out + 36, subchunk2Id, 4);
-//	writeBytes(out + 40, num_str(subchunk2Size), 4);
-//	fileStream.seekg(0);
-//	fileStream.write(out, DEFAULT_HEADER_SIZE);
-//	if (fileStream.bad()) throw es::WRITE_ERROR;
-//}
-
-//int wf::WavFile::readData(std::vector<unsigned short>& data, int readIndex) {
-//	if (open_status == CLOSED) return ZERO;
-//	int bufSize = data.size() * 2;
-//	std::vector<char> buf(bufSize);
-//	static unsigned short buf_short[DEFAULT_BUF_SIZE];
-//	int charToRead;
-//	if (readIndex + bufSize >= fileSize) {
-//		open_status = CLOSED;
-//		charToRead = (fileSize - readIndex) % bufSize;
-//	}
-//	else {
-//		charToRead = bufSize;
-//	}
-//	readIndex = readIndex + firstDataIndex;
-//	fileStream.seekg(readIndex);
-//	fileStream.read(buf.data(), charToRead);
-//	if (fileStream.bad()) throw es::READ_ERROR;
-//	std::memcpy(buf_short, buf.data(), charToRead);
-//	data.clear();
-//	data.insert(data.begin(), std::begin(buf_short), std::end(buf_short));
-//	//data.insert(data.begin(), buf_short,  + bufSize);
-//	return charToRead;
-//}
-
-//void wf::WavFile::writeHeader(char* header, int headerSize) {
-//	fileStream.seekg(0);
-//	fileStream.write(header, headerSize);
-//	if (fileStream.bad()) throw es::WRITE_ERROR;
-//}
-
-
