@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ArgsContainer.h"
+#include "Converters.h"
 #include "Errors.h"
 
 namespace ac = argscontainer;
@@ -39,6 +40,7 @@ std::vector<std::vector<std::string>> ac::ArgsContainer::returnFilenames(int arg
 		po::notify(var_map);
 		if (var_map.count("-h")) { 
 			std::cout << Allowed << '\n';
+			converter::printInformation();
 		}
 		std::set<std::string> checkRepeats(filenames[INPUT_FILES].begin(), filenames[INPUT_FILES].end());
 		if (checkRepeats.size() != filenames[INPUT_FILES].size()) {

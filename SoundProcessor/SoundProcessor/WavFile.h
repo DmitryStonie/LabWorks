@@ -67,22 +67,34 @@ namespace wavfile {
 		const char* num_str(unsigned short number);
 		void writeBytes(char* destination, const char* source, int source_size);
 	public:
+		//initialization
 		WavFile();
 		~WavFile();
 		void initialize(std::string filename);
+		void outInitialize(std::string filename);
+
+		//header manipulations
+		void readHeader();
+		unsigned long returnHeaderSize();
+		void returnHeader(char* buf_char);
+
+		//data read/write
+		void writeData(std::vector<unsigned short>& data, int writeIndex, int bytesCount);
+		void writeData(std::vector<char>& data, int writeIndex, int bytesCount);
+		int readData(std::vector<unsigned short>& data, int readIndex, int bytesCount);
+		int readData(std::vector<char>& data, int readIndex, int bytesCount);
+		
+		//helping functions
 		void changeSize(unsigned long filesize);
 		int returnDatasize();
 		int isOpen();
-		void outInitialize(std::string filename);
-		void setDefaultHeader();
-		unsigned long returnHeadersize();
-		void returnHeader(char* buf_char);
 
-		void readHeader();
-		void writeHeader();
-		void writeHeader(char* header, int headerSize);
-		int readData(std::vector<unsigned short> data, int readIndex);
-		void writeData(std::vector<unsigned short> data, int writeIndex, int bytesCount);
+		//unused
+		//void setDefaultHeader();
+		//void writeHeader();
+		//void writeHeader(char* header, int headerSize);
+		//int readData(std::vector<unsigned short>& data, int readIndex);
+
 	};
 
 }

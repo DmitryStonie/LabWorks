@@ -11,16 +11,19 @@ int cp::ConfigParser::find_converter(std::string line, std::vector<std::string> 
 	}
 }
 
-void cp::ConfigParser::write_arguments(std::string line) {
+void cp::ConfigParser::write_arguments(const std::string line) {
 	std::vector<std::string> arguments;
+	std::string line_copy = line + " ";
 	std::string DELIMETER = " ", argument;
-	line[line.size() - 1] = ' ';	//change \n to DELIMETER
+	//line[line.size()] = ' ';	//change \n to DELIMETER
 	const int DELIMETER_LENGTH = 1;
-	int first = 0, last, pos;
-	for (; (pos = line.find(DELIMETER)) != std::string::npos;) {
-		argument = line.substr(0,pos);
+	int index = line_copy.find(DELIMETER), last_index = -1, arg_length = 0;
+	for (; index != std::string::npos;) {
+		arg_length = index - last_index - 1;
+		argument = line_copy.substr(last_index + 1, arg_length);
 		arguments.push_back(argument);
-		line.erase(0, pos + DELIMETER_LENGTH);
+		last_index = index;
+		index = line_copy.find(DELIMETER, index + 1);
 	}
 	argList.push_back(arguments);
 }

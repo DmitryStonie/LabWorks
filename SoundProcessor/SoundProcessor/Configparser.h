@@ -12,7 +12,7 @@ namespace configparser {
 	};
 	class ConfigParser {
 		std::vector<std::vector<std::string>> argList;
-		int find_converter(std::string line, std::vector<std::string> converters);
+		int find_converter(const std::string line, std::vector<std::string> converters);
 		void write_arguments(std::string line);
 	public:
 		ConfigParser();
