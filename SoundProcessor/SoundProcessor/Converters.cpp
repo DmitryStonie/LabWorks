@@ -97,19 +97,20 @@ std::string cv::Mute::returnInfo() {
 
 void cv::ChangeBeats::convert(std::vector<unsigned short>& input1, std::vector<unsigned short>& input2, std::vector<unsigned short>& output, int stream_start, int stream_end) {
 	const int BEATS_IN_SECOND = 2;
+	const int BEATS_PERIOD = 4;
 	int start_index = 0, end_index = 0, output_value = 0, input_index = 0;
 	countBorders(start_index, end_index, stream_start, stream_end, output.size(), sizeof(unsigned short));
 	input_index = stream_start;
-	int index = start_index, numOfSecond = stream_start / wf::BYTES_PER_SECOND;
+	int index = start_index, numOfSecond = stream_start / wf::BYTES_PER_SECOND - interval_start / wf::BYTES_PER_SECOND;
+	if (numOfSecond < 0) {
+		input1.swap(output);
+		return;
+	}
 	int firstBitBorder = interval_start + wf::BYTES_PER_SECOND * numOfSecond + wf::BYTES_PER_SECOND / BEATS_IN_SECOND;
 	int secondBitBorder = interval_start + wf::BYTES_PER_SECOND * numOfSecond + wf::BYTES_PER_SECOND;
 	int thirdBitBorder = interval_start + wf::BYTES_PER_SECOND * numOfSecond + (wf::BYTES_PER_SECOND / BEATS_IN_SECOND + wf::BYTES_PER_SECOND);
 	if (stream_end >= interval_end) {
 		secondStreamNumber = NO_SECOND_STREAM;
-		input1.swap(output);
-		return;
-	}
-	if(start_index >= end_index) {
 		input1.swap(output);
 		return;
 	}
@@ -120,9 +121,9 @@ void cv::ChangeBeats::convert(std::vector<unsigned short>& input1, std::vector<u
 		for (; index < end_index && ((input_index > firstBitBorder && input_index <= secondBitBorder) || input_index > thirdBitBorder); index++, input_index++) {
 			output[index] = input2[index];
 		}
-		firstBitBorder += wf::BYTES_PER_SECOND * BEATS_IN_SECOND;
-		secondBitBorder += wf::BYTES_PER_SECOND * BEATS_IN_SECOND;
-		thirdBitBorder += wf::BYTES_PER_SECOND * BEATS_IN_SECOND;
+		firstBitBorder += wf::BYTES_PER_SECOND / BEATS_IN_SECOND * BEATS_PERIOD;
+		secondBitBorder += wf::BYTES_PER_SECOND / BEATS_IN_SECOND * BEATS_PERIOD;
+		thirdBitBorder += wf::BYTES_PER_SECOND / BEATS_IN_SECOND * BEATS_PERIOD;
 	}
 }
 
