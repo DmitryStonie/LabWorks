@@ -1,0 +1,4 @@
+#right config file
+mix $2 45
+changebeats 0 30
+mute 10 20
